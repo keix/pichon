@@ -21,25 +21,24 @@ Performance comes from walking memory once.
 The model naturally extends to SoA layouts for improved locality and SIMD.
 
 ### Benchmark
-These results reflect interpreter overhead, not algorithmic differences.
+Reduce (sum) on 10M elements:
 
-Summing 10,000,000 elements:
+| type | Python | Pichon | speedup |
+|------|--------|--------|---------|
+| i32  | 40 ms  | 2.5 ms | 16x     |
+| i64  | 40 ms  | 3.8 ms | 11x     |
+| f64  | 30 ms  | 4.0 ms | 8x      |
 
-```
-i32: Python  40 ms | Pichon  2.5 ms | 16x
-i64: Python  40 ms | Pichon  3.8 ms | 11x
-f64: Python  30 ms | Pichon  4.0 ms |  8x
-```
+Fusion (filter + reduce) on 10M elements (vs Python):
 
-Fusion vs 2-pass (filter > threshold, then sum):
+|          | i32  | i64  | f64  |
+|----------|------|------|------|
+| sum_gt   | 60x  | 42x  | 37x  |
+| min_gt   | 74x  | 25x  | 27x  |
+| max_gt   | 66x  | 30x  | 28x  |
 
-```
-i32: 2-pass  5.3 ms | fusion  2.2 ms | 2.5x
-i64: 2-pass  7.4 ms | fusion  5.2 ms | 1.4x
-f64: 2-pass  9.0 ms | fusion  3.6 ms | 2.5x
-```
-
-SIMD vectorization (`std.simd`) is applied uniformly across all types.
+Vectorization moves computation into registers. Fusion removes memory traffic.  
+Together, they eliminate both interpreter overhead and intermediate allocations.
 
 ## Build
 
@@ -55,7 +54,7 @@ zig build -Doptimize=ReleaseFast
 | filter | `pichon_filter_gt_{i32,i64,f64}` |
 | map    | `pichon_add_{i32,i64,f64}`<br>`pichon_sub_{i32,i64,f64}`<br>`pichon_mul_{i32,i64,f64}` |
 | map (scalar) | `pichon_add_s_{i32,i64,f64}`<br>`pichon_sub_s_{i32,i64,f64}`<br>`pichon_mul_s_{i32,i64,f64}` |
-| fusion | `pichon_sum_gt_{i32,i64,f64}`<br>`pichon_sum_lt_{i32,i64,f64}`<br>`pichon_count_gt_{i32,i64,f64}`<br>`pichon_count_lt_{i32,i64,f64}` |
+| fusion | `pichon_sum_gt_{i32,i64,f64}`<br>`pichon_sum_lt_{i32,i64,f64}`<br>`pichon_count_gt_{i32,i64,f64}`<br>`pichon_count_lt_{i32,i64,f64}`<br>`pichon_min_gt_{i32,i64,f64}`<br>`pichon_min_lt_{i32,i64,f64}`<br>`pichon_max_gt_{i32,i64,f64}`<br>`pichon_max_lt_{i32,i64,f64}` |
 
 ## Usage
 
@@ -97,7 +96,7 @@ src/
 ├── reduce.zig   # sum, min, max
 ├── filter.zig   # filter_gt
 ├── map.zig      # add, sub, mul, add_s, sub_s, mul_s
-├── fusion.zig   # sum_gt, sum_lt, count_gt, count_lt
+├── fusion.zig   # sum_gt/lt, count_gt/lt, min_gt/lt, max_gt/lt
 ├── layout.zig
 └── error.zig
 

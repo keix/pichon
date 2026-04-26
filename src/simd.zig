@@ -27,6 +27,14 @@ pub fn reduceAdd(comptime T: type, v: Vec(T)) T {
     return @reduce(.Add, v);
 }
 
+pub fn reduceMin(comptime T: type, v: Vec(T)) T {
+    return @reduce(.Min, v);
+}
+
+pub fn reduceMax(comptime T: type, v: Vec(T)) T {
+    return @reduce(.Max, v);
+}
+
 // -----------------------------------------------------------------------------
 // Reduce operations
 // -----------------------------------------------------------------------------
@@ -237,6 +245,126 @@ pub fn countLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) usiz
 }
 
 // -----------------------------------------------------------------------------
+// Conditional min (> threshold)
+// -----------------------------------------------------------------------------
+
+fn minIdentity(comptime T: type) T {
+    return switch (@typeInfo(T)) {
+        .int => std.math.maxInt(T),
+        .float => std.math.inf(T),
+        else => @compileError("unsupported type"),
+    };
+}
+
+fn maxIdentity(comptime T: type) T {
+    return switch (@typeInfo(T)) {
+        .int => std.math.minInt(T),
+        .float => -std.math.inf(T),
+        else => @compileError("unsupported type"),
+    };
+}
+
+pub fn minGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
+    const L = comptime lanes(T);
+    const identity: Vec(T) = splat(T, minIdentity(T));
+    const threshold_vec: Vec(T) = splat(T, threshold);
+
+    var acc: Vec(T) = identity;
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const chunk: Vec(T) = ptr[i..][0..L].*;
+        const mask = chunk > threshold_vec;
+        const selected = @select(T, mask, chunk, identity);
+        acc = @min(acc, selected);
+    }
+
+    var result: T = reduceMin(T, acc);
+
+    while (i < len) : (i += 1) {
+        if (ptr[i] > threshold and ptr[i] < result) result = ptr[i];
+    }
+
+    return result;
+}
+
+pub fn minLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
+    const L = comptime lanes(T);
+    const identity: Vec(T) = splat(T, minIdentity(T));
+    const threshold_vec: Vec(T) = splat(T, threshold);
+
+    var acc: Vec(T) = identity;
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const chunk: Vec(T) = ptr[i..][0..L].*;
+        const mask = chunk < threshold_vec;
+        const selected = @select(T, mask, chunk, identity);
+        acc = @min(acc, selected);
+    }
+
+    var result: T = reduceMin(T, acc);
+
+    while (i < len) : (i += 1) {
+        if (ptr[i] < threshold and ptr[i] < result) result = ptr[i];
+    }
+
+    return result;
+}
+
+// -----------------------------------------------------------------------------
+// Conditional max (> threshold)
+// -----------------------------------------------------------------------------
+
+pub fn maxGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
+    const L = comptime lanes(T);
+    const identity: Vec(T) = splat(T, maxIdentity(T));
+    const threshold_vec: Vec(T) = splat(T, threshold);
+
+    var acc: Vec(T) = identity;
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const chunk: Vec(T) = ptr[i..][0..L].*;
+        const mask = chunk > threshold_vec;
+        const selected = @select(T, mask, chunk, identity);
+        acc = @max(acc, selected);
+    }
+
+    var result: T = reduceMax(T, acc);
+
+    while (i < len) : (i += 1) {
+        if (ptr[i] > threshold and ptr[i] > result) result = ptr[i];
+    }
+
+    return result;
+}
+
+pub fn maxLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
+    const L = comptime lanes(T);
+    const identity: Vec(T) = splat(T, maxIdentity(T));
+    const threshold_vec: Vec(T) = splat(T, threshold);
+
+    var acc: Vec(T) = identity;
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const chunk: Vec(T) = ptr[i..][0..L].*;
+        const mask = chunk < threshold_vec;
+        const selected = @select(T, mask, chunk, identity);
+        acc = @max(acc, selected);
+    }
+
+    var result: T = reduceMax(T, acc);
+
+    while (i < len) : (i += 1) {
+        if (ptr[i] < threshold and ptr[i] > result) result = ptr[i];
+    }
+
+    return result;
+}
+
+// -----------------------------------------------------------------------------
 // Tests
 // -----------------------------------------------------------------------------
 
@@ -272,4 +400,34 @@ test "sumGt i32" {
 test "countGt f64" {
     const data = [_]f64{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
     try testing.expectEqual(@as(usize, 5), countGt(f64, &data, data.len, 5));
+}
+
+test "minGt i32" {
+    const data = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    try testing.expectEqual(@as(i32, 6), minGt(i32, &data, data.len, 5));
+}
+
+test "minLt i32" {
+    const data = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    try testing.expectEqual(@as(i32, 1), minLt(i32, &data, data.len, 5));
+}
+
+test "maxGt i32" {
+    const data = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    try testing.expectEqual(@as(i32, 10), maxGt(i32, &data, data.len, 5));
+}
+
+test "maxLt i32" {
+    const data = [_]i32{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    try testing.expectEqual(@as(i32, 4), maxLt(i32, &data, data.len, 5));
+}
+
+test "minGt f64" {
+    const data = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+    try testing.expectApproxEqAbs(@as(f64, 6.0), minGt(f64, &data, data.len, 5.0), 0.001);
+}
+
+test "maxLt f64" {
+    const data = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+    try testing.expectApproxEqAbs(@as(f64, 4.0), maxLt(f64, &data, data.len, 5.0), 0.001);
 }
