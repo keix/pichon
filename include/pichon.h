@@ -120,4 +120,36 @@ size_t pichon_count_lt_i32(const int32_t* ptr, size_t len, int32_t threshold);
 size_t pichon_count_lt_i64(const int64_t* ptr, size_t len, int64_t threshold);
 size_t pichon_count_lt_f64(const double* ptr, size_t len, double threshold);
 
+// -----------------------------------------------------------------------------
+// Fusion: min_gt (filter > threshold, then min)
+// -----------------------------------------------------------------------------
+
+int32_t pichon_min_gt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_min_gt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_min_gt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: min_lt (filter < threshold, then min)
+// -----------------------------------------------------------------------------
+
+int32_t pichon_min_lt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_min_lt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_min_lt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: max_gt (filter > threshold, then max)
+// -----------------------------------------------------------------------------
+
+int32_t pichon_max_gt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_max_gt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_max_gt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: max_lt (filter < threshold, then max)
+// -----------------------------------------------------------------------------
+
+int32_t pichon_max_lt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_max_lt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_max_lt_f64(const double* ptr, size_t len, double threshold);
+
 #endif // PICHON_H
