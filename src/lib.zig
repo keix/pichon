@@ -4,6 +4,7 @@
 // Entry point. Re-exports all public symbols.
 // =============================================================================
 
+pub const simd = @import("simd.zig");
 pub const reduce = @import("reduce.zig");
 pub const filter = @import("filter.zig");
 pub const map = @import("map.zig");

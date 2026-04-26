@@ -26,25 +26,20 @@ These results reflect interpreter overhead, not algorithmic differences.
 Summing 10,000,000 elements:
 
 ```
-i32: Python  50.02 ms | Pichon  1.97 ms | 25.4x
-i64: Python  41.68 ms | Pichon  4.08 ms | 10.2x
-f64: Python  32.78 ms | Pichon  5.71 ms |  5.7x
+i32: Python  40 ms | Pichon  2.5 ms | 16x
+i64: Python  40 ms | Pichon  3.8 ms | 11x
+f64: Python  30 ms | Pichon  4.0 ms |  8x
 ```
 
 Fusion vs 2-pass (filter > threshold, then sum):
 
 ```
-i32: 2-pass  5.21 ms | fusion  2.08 ms | 2.5x
-i64: 2-pass  8.90 ms | fusion  4.23 ms | 2.1x
-f64: 2-pass  9.62 ms | fusion 10.52 ms | 0.9x
+i32: 2-pass  5.3 ms | fusion  2.2 ms | 2.5x
+i64: 2-pass  7.4 ms | fusion  5.2 ms | 1.4x
+f64: 2-pass  9.0 ms | fusion  3.6 ms | 2.5x
 ```
 
-
-Note:
-- i32/i64 are memory-bound → fusion reduces memory traffic and improves performance.
-- f64 is compute-bound → fusion does not improve performance.
-
-Fusion removes memory traffic, not computation.
+SIMD vectorization (`std.simd`) is applied uniformly across all types.
 
 ## Build
 
@@ -98,6 +93,7 @@ lib.pichon_count_gt_i32(data, 5, 25)  # 3
 ```
 src/
 ├── lib.zig      # entry point
+├── simd.zig     # SIMD primitives
 ├── reduce.zig   # sum, min, max
 ├── filter.zig   # filter_gt
 ├── map.zig      # add, sub, mul, add_s, sub_s, mul_s

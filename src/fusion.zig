@@ -2,66 +2,25 @@
 // Fusion operations
 // =============================================================================
 // Combined filter + reduce in a single pass.
+// Backed by unified SIMD primitives.
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// Generic implementations (internal)
-// -----------------------------------------------------------------------------
-
-fn sumGtGeneric(comptime T: type, comptime R: type, ptr: [*]const T, len: usize, threshold: T) R {
-    var total: R = 0;
-    for (ptr[0..len]) |v| {
-        if (v > threshold) {
-            total += @as(R, v);
-        }
-    }
-    return total;
-}
-
-fn sumLtGeneric(comptime T: type, comptime R: type, ptr: [*]const T, len: usize, threshold: T) R {
-    var total: R = 0;
-    for (ptr[0..len]) |v| {
-        if (v < threshold) {
-            total += @as(R, v);
-        }
-    }
-    return total;
-}
-
-fn countGtGeneric(comptime T: type, ptr: [*]const T, len: usize, threshold: T) usize {
-    var count: usize = 0;
-    for (ptr[0..len]) |v| {
-        if (v > threshold) {
-            count += 1;
-        }
-    }
-    return count;
-}
-
-fn countLtGeneric(comptime T: type, ptr: [*]const T, len: usize, threshold: T) usize {
-    var count: usize = 0;
-    for (ptr[0..len]) |v| {
-        if (v < threshold) {
-            count += 1;
-        }
-    }
-    return count;
-}
+const simd = @import("simd.zig");
 
 // -----------------------------------------------------------------------------
 // Exports: sum_gt (filter > threshold, then sum)
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_sum_gt_i32(ptr: [*]const i32, len: usize, threshold: i32) i64 {
-    return sumGtGeneric(i32, i64, ptr, len, threshold);
+    return simd.sumGtWiden(i32, i64, ptr, len, threshold);
 }
 
 pub export fn pichon_sum_gt_i64(ptr: [*]const i64, len: usize, threshold: i64) i64 {
-    return sumGtGeneric(i64, i64, ptr, len, threshold);
+    return simd.sumGt(i64, ptr, len, threshold);
 }
 
 pub export fn pichon_sum_gt_f64(ptr: [*]const f64, len: usize, threshold: f64) f64 {
-    return sumGtGeneric(f64, f64, ptr, len, threshold);
+    return simd.sumGt(f64, ptr, len, threshold);
 }
 
 // -----------------------------------------------------------------------------
@@ -69,15 +28,15 @@ pub export fn pichon_sum_gt_f64(ptr: [*]const f64, len: usize, threshold: f64) f
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_sum_lt_i32(ptr: [*]const i32, len: usize, threshold: i32) i64 {
-    return sumLtGeneric(i32, i64, ptr, len, threshold);
+    return simd.sumLtWiden(i32, i64, ptr, len, threshold);
 }
 
 pub export fn pichon_sum_lt_i64(ptr: [*]const i64, len: usize, threshold: i64) i64 {
-    return sumLtGeneric(i64, i64, ptr, len, threshold);
+    return simd.sumLt(i64, ptr, len, threshold);
 }
 
 pub export fn pichon_sum_lt_f64(ptr: [*]const f64, len: usize, threshold: f64) f64 {
-    return sumLtGeneric(f64, f64, ptr, len, threshold);
+    return simd.sumLt(f64, ptr, len, threshold);
 }
 
 // -----------------------------------------------------------------------------
@@ -85,15 +44,15 @@ pub export fn pichon_sum_lt_f64(ptr: [*]const f64, len: usize, threshold: f64) f
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_count_gt_i32(ptr: [*]const i32, len: usize, threshold: i32) usize {
-    return countGtGeneric(i32, ptr, len, threshold);
+    return simd.countGt(i32, ptr, len, threshold);
 }
 
 pub export fn pichon_count_gt_i64(ptr: [*]const i64, len: usize, threshold: i64) usize {
-    return countGtGeneric(i64, ptr, len, threshold);
+    return simd.countGt(i64, ptr, len, threshold);
 }
 
 pub export fn pichon_count_gt_f64(ptr: [*]const f64, len: usize, threshold: f64) usize {
-    return countGtGeneric(f64, ptr, len, threshold);
+    return simd.countGt(f64, ptr, len, threshold);
 }
 
 // -----------------------------------------------------------------------------
@@ -101,15 +60,15 @@ pub export fn pichon_count_gt_f64(ptr: [*]const f64, len: usize, threshold: f64)
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_count_lt_i32(ptr: [*]const i32, len: usize, threshold: i32) usize {
-    return countLtGeneric(i32, ptr, len, threshold);
+    return simd.countLt(i32, ptr, len, threshold);
 }
 
 pub export fn pichon_count_lt_i64(ptr: [*]const i64, len: usize, threshold: i64) usize {
-    return countLtGeneric(i64, ptr, len, threshold);
+    return simd.countLt(i64, ptr, len, threshold);
 }
 
 pub export fn pichon_count_lt_f64(ptr: [*]const f64, len: usize, threshold: f64) usize {
-    return countLtGeneric(f64, ptr, len, threshold);
+    return simd.countLt(f64, ptr, len, threshold);
 }
 
 // -----------------------------------------------------------------------------
@@ -138,9 +97,22 @@ test "count_gt_i32" {
     try testing.expectEqual(@as(usize, 3), count);
 }
 
+test "sum_gt_i64" {
+    const data = [_]i64{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    const result = pichon_sum_gt_i64(&data, data.len, 5);
+    // 6 + 7 + 8 + 9 + 10 = 40
+    try testing.expectEqual(@as(i64, 40), result);
+}
+
 test "sum_gt_f64" {
     const data = [_]f64{ 1.5, 2.5, 3.5, 4.5 };
     const result = pichon_sum_gt_f64(&data, data.len, 2.0);
     // 2.5 + 3.5 + 4.5 = 10.5
     try testing.expectApproxEqAbs(@as(f64, 10.5), result, 0.001);
+}
+
+test "count_gt_f64" {
+    const data = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+    const count = pichon_count_gt_f64(&data, data.len, 5.0);
+    try testing.expectEqual(@as(usize, 5), count);
 }
