@@ -21,6 +21,7 @@ Performance comes from walking memory once.
 The model naturally extends to SoA layouts for improved locality and SIMD.
 
 ### Benchmark
+
 Reduce (sum) on 10M elements:
 
 | type | Python | Pichon | speedup |
@@ -29,16 +30,33 @@ Reduce (sum) on 10M elements:
 | i64  | 40 ms  | 3.8 ms | 11x     |
 | f64  | 30 ms  | 4.0 ms | 8x      |
 
-Fusion (filter + reduce) on 10M elements (vs Python):
+Fusion (filter > threshold, then reduce) on 10M elements:
 
-|          | i32  | i64  | f64  |
-|----------|------|------|------|
-| sum_gt   | 60x  | 42x  | 37x  |
-| min_gt   | 74x  | 25x  | 27x  |
-| max_gt   | 66x  | 30x  | 28x  |
+**sum_gt**
 
-Vectorization moves computation into registers. Fusion removes memory traffic.  
-Together, they eliminate both interpreter overhead and intermediate allocations.
+| type | Python | 2-pass | fusion | speedup |
+|------|--------|--------|--------|---------|
+| i32  | 171 ms | 4.0 ms | 2.4 ms | 73x     |
+| i64  | 174 ms | 11 ms  | 4.2 ms | 41x     |
+| f64  | 147 ms | 8.5 ms | 3.9 ms | 38x     |
+
+**min_gt**
+
+| type | Python | 2-pass | fusion | speedup |
+|------|--------|--------|--------|---------|
+| i32  | 199 ms | 4.9 ms | 2.2 ms | 90x     |
+| i64  | 197 ms | 9.3 ms | 6.5 ms | 30x     |
+| f64  | 184 ms | 11 ms  | 6.1 ms | 30x     |
+
+**max_gt**
+
+| type | Python | 2-pass | fusion | speedup |
+|------|--------|--------|--------|---------|
+| i32  | 190 ms | 4.0 ms | 2.1 ms | 91x     |
+| i64  | 190 ms | 11 ms  | 6.2 ms | 31x     |
+| f64  | 176 ms | 12 ms  | 6.2 ms | 29x     |
+
+Vectorization moves computation into registers. Fusion removes memory traffic.
 
 ## Build
 
