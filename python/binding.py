@@ -122,6 +122,58 @@ lib.pichon_mul_s_i64.restype = None
 lib.pichon_mul_s_f64.argtypes = [POINTER(c_double), c_size_t, c_double, POINTER(c_double)]
 lib.pichon_mul_s_f64.restype = None
 
+# =============================================================================
+# Fusion: sum_gt (filter > threshold, then sum)
+# =============================================================================
+
+lib.pichon_sum_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
+lib.pichon_sum_gt_i32.restype = c_int64
+
+lib.pichon_sum_gt_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64]
+lib.pichon_sum_gt_i64.restype = c_int64
+
+lib.pichon_sum_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
+lib.pichon_sum_gt_f64.restype = c_double
+
+# =============================================================================
+# Fusion: sum_lt (filter < threshold, then sum)
+# =============================================================================
+
+lib.pichon_sum_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
+lib.pichon_sum_lt_i32.restype = c_int64
+
+lib.pichon_sum_lt_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64]
+lib.pichon_sum_lt_i64.restype = c_int64
+
+lib.pichon_sum_lt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
+lib.pichon_sum_lt_f64.restype = c_double
+
+# =============================================================================
+# Fusion: count_gt (count where > threshold)
+# =============================================================================
+
+lib.pichon_count_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
+lib.pichon_count_gt_i32.restype = c_size_t
+
+lib.pichon_count_gt_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64]
+lib.pichon_count_gt_i64.restype = c_size_t
+
+lib.pichon_count_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
+lib.pichon_count_gt_f64.restype = c_size_t
+
+# =============================================================================
+# Fusion: count_lt (count where < threshold)
+# =============================================================================
+
+lib.pichon_count_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
+lib.pichon_count_lt_i32.restype = c_size_t
+
+lib.pichon_count_lt_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64]
+lib.pichon_count_lt_i64.restype = c_size_t
+
+lib.pichon_count_lt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
+lib.pichon_count_lt_f64.restype = c_size_t
+
 
 # =============================================================================
 # Demo

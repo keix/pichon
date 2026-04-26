@@ -1,22 +1,14 @@
 // =============================================================================
 // Reduce operations
 // =============================================================================
-// Generic implementations + type-specific exports for C ABI.
+// Type-specific exports for C ABI, backed by unified SIMD primitives.
 // =============================================================================
 
-// -----------------------------------------------------------------------------
-// Generic implementations (internal)
-// -----------------------------------------------------------------------------
+const simd = @import("simd.zig");
 
-fn sumGeneric(comptime T: type, comptime R: type, ptr: [*]const T, len: usize) R {
-    if (len == 0) return 0;
-
-    var total: R = 0;
-    for (ptr[0..len]) |v| {
-        total += @as(R, v);
-    }
-    return total;
-}
+// -----------------------------------------------------------------------------
+// Scalar implementations (min/max - SIMD planned for Phase 2)
+// -----------------------------------------------------------------------------
 
 fn minGeneric(comptime T: type, ptr: [*]const T, len: usize) T {
     if (len == 0) return 0;
@@ -39,23 +31,23 @@ fn maxGeneric(comptime T: type, ptr: [*]const T, len: usize) T {
 }
 
 // -----------------------------------------------------------------------------
-// Exports: sum
+// Exports: sum (SIMD)
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_sum_i32(ptr: [*]const i32, len: usize) i64 {
-    return sumGeneric(i32, i64, ptr, len);
+    return simd.sumWiden(i32, i64, ptr, len);
 }
 
 pub export fn pichon_sum_i64(ptr: [*]const i64, len: usize) i64 {
-    return sumGeneric(i64, i64, ptr, len);
+    return simd.sum(i64, ptr, len);
 }
 
 pub export fn pichon_sum_f64(ptr: [*]const f64, len: usize) f64 {
-    return sumGeneric(f64, f64, ptr, len);
+    return simd.sum(f64, ptr, len);
 }
 
 // -----------------------------------------------------------------------------
-// Exports: min
+// Exports: min (scalar)
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_min_i32(ptr: [*]const i32, len: usize) i32 {
@@ -71,7 +63,7 @@ pub export fn pichon_min_f64(ptr: [*]const f64, len: usize) f64 {
 }
 
 // -----------------------------------------------------------------------------
-// Exports: max
+// Exports: max (scalar)
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_max_i32(ptr: [*]const i32, len: usize) i32 {
@@ -102,6 +94,18 @@ test "sum_i32 overflow safety" {
     const data = [_]i32{ 2147483647, 1 };
     const result = pichon_sum_i32(&data, data.len);
     try testing.expectEqual(@as(i64, 2147483648), result);
+}
+
+test "sum_i64" {
+    const data = [_]i64{ 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+    const result = pichon_sum_i64(&data, data.len);
+    try testing.expectEqual(@as(i64, 55), result);
+}
+
+test "sum_f64" {
+    const data = [_]f64{ 1.0, 2.0, 3.0, 4.0, 5.0, 6.0, 7.0, 8.0, 9.0, 10.0 };
+    const result = pichon_sum_f64(&data, data.len);
+    try testing.expectApproxEqAbs(@as(f64, 55.0), result, 0.001);
 }
 
 test "min_i32" {
