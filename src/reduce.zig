@@ -7,7 +7,8 @@
 const simd = @import("simd.zig");
 
 // -----------------------------------------------------------------------------
-// Scalar implementations (min/max - SIMD planned for Phase 2)
+// Scalar implementations for standalone min/max
+// (Fused min/max use SIMD in simd.zig)
 // -----------------------------------------------------------------------------
 
 fn minGeneric(comptime T: type, ptr: [*]const T, len: usize) T {

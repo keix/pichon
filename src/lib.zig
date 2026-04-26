@@ -75,6 +75,26 @@ comptime {
     _ = &fusion.pichon_count_lt_i32;
     _ = &fusion.pichon_count_lt_i64;
     _ = &fusion.pichon_count_lt_f64;
+
+    // fusion: min_gt
+    _ = &fusion.pichon_min_gt_i32;
+    _ = &fusion.pichon_min_gt_i64;
+    _ = &fusion.pichon_min_gt_f64;
+
+    // fusion: min_lt
+    _ = &fusion.pichon_min_lt_i32;
+    _ = &fusion.pichon_min_lt_i64;
+    _ = &fusion.pichon_min_lt_f64;
+
+    // fusion: max_gt
+    _ = &fusion.pichon_max_gt_i32;
+    _ = &fusion.pichon_max_gt_i64;
+    _ = &fusion.pichon_max_gt_f64;
+
+    // fusion: max_lt
+    _ = &fusion.pichon_max_lt_i32;
+    _ = &fusion.pichon_max_lt_i64;
+    _ = &fusion.pichon_max_lt_f64;
 }
 
 // Tests
