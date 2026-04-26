@@ -6,6 +6,7 @@
 
 pub const reduce = @import("reduce.zig");
 pub const filter = @import("filter.zig");
+pub const map = @import("map.zig");
 pub const layout = @import("layout.zig");
 pub const err = @import("error.zig");
 
@@ -30,6 +31,28 @@ comptime {
     _ = &filter.pichon_filter_gt_i32;
     _ = &filter.pichon_filter_gt_i64;
     _ = &filter.pichon_filter_gt_f64;
+
+    // map: binary
+    _ = &map.pichon_add_i32;
+    _ = &map.pichon_add_i64;
+    _ = &map.pichon_add_f64;
+    _ = &map.pichon_sub_i32;
+    _ = &map.pichon_sub_i64;
+    _ = &map.pichon_sub_f64;
+    _ = &map.pichon_mul_i32;
+    _ = &map.pichon_mul_i64;
+    _ = &map.pichon_mul_f64;
+
+    // map: scalar
+    _ = &map.pichon_add_s_i32;
+    _ = &map.pichon_add_s_i64;
+    _ = &map.pichon_add_s_f64;
+    _ = &map.pichon_sub_s_i32;
+    _ = &map.pichon_sub_s_i64;
+    _ = &map.pichon_sub_s_f64;
+    _ = &map.pichon_mul_s_i32;
+    _ = &map.pichon_mul_s_i64;
+    _ = &map.pichon_mul_s_f64;
 }
 
 // Tests

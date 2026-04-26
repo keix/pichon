@@ -1,33 +1,10 @@
 """
 Pichon Python binding via ctypes.
-
-Usage:
-    from binding import lib, c_int32, c_int64, c_double, c_size_t
-
-    # Create array
-    data = (c_int32 * 5)(10, 20, 30, 40, 50)
-
-    # Sum
-    total = lib.pichon_sum_i32(data, len(data))
-    print(total)  # 150
-
-    # Filter
-    out = (c_int32 * 5)()
-    count = lib.pichon_filter_gt_i32(data, len(data), out, 25)
-    print(list(out[:count]))  # [30, 40, 50]
 """
 
-from ctypes import (
-    CDLL,
-    POINTER,
-    c_int32,
-    c_int64,
-    c_double,
-    c_size_t,
-)
+from ctypes import CDLL, POINTER, c_int32, c_int64, c_double, c_size_t
 from pathlib import Path
 
-# Find library
 _lib_path = Path(__file__).parent.parent / "zig-out" / "lib" / "libpichon.so"
 lib = CDLL(str(_lib_path))
 
@@ -45,23 +22,27 @@ lib.pichon_sum_f64.argtypes = [POINTER(c_double), c_size_t]
 lib.pichon_sum_f64.restype = c_double
 
 # =============================================================================
-# Reduce: min/max
+# Reduce: min
 # =============================================================================
 
 lib.pichon_min_i32.argtypes = [POINTER(c_int32), c_size_t]
 lib.pichon_min_i32.restype = c_int32
 
-lib.pichon_max_i32.argtypes = [POINTER(c_int32), c_size_t]
-lib.pichon_max_i32.restype = c_int32
-
 lib.pichon_min_i64.argtypes = [POINTER(c_int64), c_size_t]
 lib.pichon_min_i64.restype = c_int64
 
-lib.pichon_max_i64.argtypes = [POINTER(c_int64), c_size_t]
-lib.pichon_max_i64.restype = c_int64
-
 lib.pichon_min_f64.argtypes = [POINTER(c_double), c_size_t]
 lib.pichon_min_f64.restype = c_double
+
+# =============================================================================
+# Reduce: max
+# =============================================================================
+
+lib.pichon_max_i32.argtypes = [POINTER(c_int32), c_size_t]
+lib.pichon_max_i32.restype = c_int32
+
+lib.pichon_max_i64.argtypes = [POINTER(c_int64), c_size_t]
+lib.pichon_max_i64.restype = c_int64
 
 lib.pichon_max_f64.argtypes = [POINTER(c_double), c_size_t]
 lib.pichon_max_f64.restype = c_double
@@ -70,53 +51,121 @@ lib.pichon_max_f64.restype = c_double
 # Filter: greater than
 # =============================================================================
 
-lib.pichon_filter_gt_i32.argtypes = [
-    POINTER(c_int32),
-    c_size_t,
-    POINTER(c_int32),
-    c_int32,
-]
+lib.pichon_filter_gt_i32.argtypes = [POINTER(c_int32), c_size_t, POINTER(c_int32), c_int32]
 lib.pichon_filter_gt_i32.restype = c_size_t
 
-lib.pichon_filter_gt_i64.argtypes = [
-    POINTER(c_int64),
-    c_size_t,
-    POINTER(c_int64),
-    c_int64,
-]
+lib.pichon_filter_gt_i64.argtypes = [POINTER(c_int64), c_size_t, POINTER(c_int64), c_int64]
 lib.pichon_filter_gt_i64.restype = c_size_t
 
-lib.pichon_filter_gt_f64.argtypes = [
-    POINTER(c_double),
-    c_size_t,
-    POINTER(c_double),
-    c_double,
-]
+lib.pichon_filter_gt_f64.argtypes = [POINTER(c_double), c_size_t, POINTER(c_double), c_double]
 lib.pichon_filter_gt_f64.restype = c_size_t
 
+# =============================================================================
+# Map: binary add/sub/mul
+# =============================================================================
+
+lib.pichon_add_i32.argtypes = [POINTER(c_int32), POINTER(c_int32), c_size_t, POINTER(c_int32)]
+lib.pichon_add_i32.restype = None
+
+lib.pichon_add_i64.argtypes = [POINTER(c_int64), POINTER(c_int64), c_size_t, POINTER(c_int64)]
+lib.pichon_add_i64.restype = None
+
+lib.pichon_add_f64.argtypes = [POINTER(c_double), POINTER(c_double), c_size_t, POINTER(c_double)]
+lib.pichon_add_f64.restype = None
+
+lib.pichon_sub_i32.argtypes = [POINTER(c_int32), POINTER(c_int32), c_size_t, POINTER(c_int32)]
+lib.pichon_sub_i32.restype = None
+
+lib.pichon_sub_i64.argtypes = [POINTER(c_int64), POINTER(c_int64), c_size_t, POINTER(c_int64)]
+lib.pichon_sub_i64.restype = None
+
+lib.pichon_sub_f64.argtypes = [POINTER(c_double), POINTER(c_double), c_size_t, POINTER(c_double)]
+lib.pichon_sub_f64.restype = None
+
+lib.pichon_mul_i32.argtypes = [POINTER(c_int32), POINTER(c_int32), c_size_t, POINTER(c_int32)]
+lib.pichon_mul_i32.restype = None
+
+lib.pichon_mul_i64.argtypes = [POINTER(c_int64), POINTER(c_int64), c_size_t, POINTER(c_int64)]
+lib.pichon_mul_i64.restype = None
+
+lib.pichon_mul_f64.argtypes = [POINTER(c_double), POINTER(c_double), c_size_t, POINTER(c_double)]
+lib.pichon_mul_f64.restype = None
 
 # =============================================================================
-# Convenience functions
+# Map: scalar add/sub/mul
 # =============================================================================
 
-def sum_i32(data: list[int]) -> int:
-    """Sum a list of integers."""
-    arr = (c_int32 * len(data))(*data)
-    return lib.pichon_sum_i32(arr, len(data))
+lib.pichon_add_s_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32, POINTER(c_int32)]
+lib.pichon_add_s_i32.restype = None
+
+lib.pichon_add_s_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64, POINTER(c_int64)]
+lib.pichon_add_s_i64.restype = None
+
+lib.pichon_add_s_f64.argtypes = [POINTER(c_double), c_size_t, c_double, POINTER(c_double)]
+lib.pichon_add_s_f64.restype = None
+
+lib.pichon_sub_s_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32, POINTER(c_int32)]
+lib.pichon_sub_s_i32.restype = None
+
+lib.pichon_sub_s_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64, POINTER(c_int64)]
+lib.pichon_sub_s_i64.restype = None
+
+lib.pichon_sub_s_f64.argtypes = [POINTER(c_double), c_size_t, c_double, POINTER(c_double)]
+lib.pichon_sub_s_f64.restype = None
+
+lib.pichon_mul_s_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32, POINTER(c_int32)]
+lib.pichon_mul_s_i32.restype = None
+
+lib.pichon_mul_s_i64.argtypes = [POINTER(c_int64), c_size_t, c_int64, POINTER(c_int64)]
+lib.pichon_mul_s_i64.restype = None
+
+lib.pichon_mul_s_f64.argtypes = [POINTER(c_double), c_size_t, c_double, POINTER(c_double)]
+lib.pichon_mul_s_f64.restype = None
 
 
-def filter_gt_i32(data: list[int], threshold: int) -> list[int]:
-    """Filter integers greater than threshold."""
-    arr = (c_int32 * len(data))(*data)
-    out = (c_int32 * len(data))()
-    count = lib.pichon_filter_gt_i32(arr, len(data), out, threshold)
-    return list(out[:count])
-
+# =============================================================================
+# Demo
+# =============================================================================
 
 if __name__ == "__main__":
-    # Demo
-    data = [10, 50, 30, 80, 20]
+    print("=== i32 ===")
+    data = (c_int32 * 5)(10, 20, 30, 40, 50)
+    print(f"sum: {lib.pichon_sum_i32(data, 5)}")
+    print(f"min: {lib.pichon_min_i32(data, 5)}")
+    print(f"max: {lib.pichon_max_i32(data, 5)}")
 
-    print(f"Data: {data}")
-    print(f"Sum: {sum_i32(data)}")
-    print(f"Filter > 25: {filter_gt_i32(data, 25)}")
+    out = (c_int32 * 5)()
+    count = lib.pichon_filter_gt_i32(data, 5, out, 25)
+    print(f"filter > 25: {list(out[:count])}")
+
+    a = (c_int32 * 3)(100, 200, 300)
+    b = (c_int32 * 3)(10, 20, 30)
+    out3 = (c_int32 * 3)()
+    lib.pichon_mul_i32(a, b, 3, out3)
+    print(f"mul: {list(out3)}")
+
+    lib.pichon_mul_s_i32(a, 3, 2, a)
+    print(f"in-place *2: {list(a)}")
+
+    print("\n=== i64 ===")
+    data64 = (c_int64 * 3)(10_000_000_000, 20_000_000_000, 30_000_000_000)
+    print(f"sum: {lib.pichon_sum_i64(data64, 3)}")
+    print(f"min: {lib.pichon_min_i64(data64, 3)}")
+    print(f"max: {lib.pichon_max_i64(data64, 3)}")
+
+    a64 = (c_int64 * 2)(1_000_000_000, 2_000_000_000)
+    b64 = (c_int64 * 2)(3, 4)
+    out64 = (c_int64 * 2)()
+    lib.pichon_mul_i64(a64, b64, 2, out64)
+    print(f"mul: {list(out64)}")
+
+    print("\n=== f64 ===")
+    dataf = (c_double * 4)(1.5, 2.5, 3.5, 4.5)
+    print(f"sum: {lib.pichon_sum_f64(dataf, 4)}")
+    print(f"min: {lib.pichon_min_f64(dataf, 4)}")
+    print(f"max: {lib.pichon_max_f64(dataf, 4)}")
+
+    af = (c_double * 3)(100.0, 200.0, 300.0)
+    outf = (c_double * 3)()
+    lib.pichon_mul_s_f64(af, 3, 1.1, outf)
+    print(f"mul_s *1.1: {list(outf)}")
