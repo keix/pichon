@@ -1,4 +1,7 @@
 # Pichon
+Python defines structure. Native code executes.
+
+## What is this
 Pichon is an execution engine over contiguous memory.  
 It operates on raw memory passed from Python through a C ABI, executing single-pass loops in Zig.
 
@@ -14,16 +17,18 @@ Instead of iterating over Python objects, it operates on contiguous memory using
 - No pointer chasing
 - Single-pass execution
 
-Performance comes from walking memory once.
+Performance comes from walking memory once.  
+The model naturally extends to SoA layouts for improved locality and SIMD.
 
 ### Benchmark
-Summing 10,000,000 integers:
+These results reflect interpreter overhead, not algorithmic differences.
+
+Summing 10,000,000 elements:
 
 ```
-N = 10,000,000
-Python:  39.79 ms
-Pichon:  2.74 ms
-Speedup: 14.5x
+i32: Python  50.02 ms | Pichon  1.97 ms | 25.4x
+i64: Python  41.68 ms | Pichon  4.08 ms | 10.2x
+f64: Python  32.78 ms | Pichon  5.71 ms |  5.7x
 ```
 
 ## Build
@@ -54,16 +59,18 @@ lib.pichon_sum_i32(data, 5)  # 150
 # filter
 out = (c_int32 * 5)()
 count = lib.pichon_filter_gt_i32(data, 5, out, 25)
-# out[:count] = [30, 40, 50]
+print(list(out[:count]))  # [30, 40, 50]
 
 # map
 a = (c_int32 * 3)(100, 200, 300)
 b = (c_int32 * 3)(10, 20, 30)
 out = (c_int32 * 3)()
-lib.pichon_mul_i32(a, b, 3, out)  # [1000, 4000, 9000]
+lib.pichon_mul_i32(a, b, 3, out)
+print(list(out))  # [1000, 4000, 9000]
 
 # map scalar (in-place)
-lib.pichon_mul_s_i32(a, 3, 2, a)  # [200, 400, 600]
+lib.pichon_mul_s_i32(a, 3, 2, a)
+print(list(a))  # [200, 400, 600]
 ```
 
 ## Structure
