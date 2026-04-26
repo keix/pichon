@@ -7,6 +7,7 @@
 pub const reduce = @import("reduce.zig");
 pub const filter = @import("filter.zig");
 pub const map = @import("map.zig");
+pub const fusion = @import("fusion.zig");
 pub const layout = @import("layout.zig");
 pub const err = @import("error.zig");
 
@@ -53,6 +54,26 @@ comptime {
     _ = &map.pichon_mul_s_i32;
     _ = &map.pichon_mul_s_i64;
     _ = &map.pichon_mul_s_f64;
+
+    // fusion: sum_gt
+    _ = &fusion.pichon_sum_gt_i32;
+    _ = &fusion.pichon_sum_gt_i64;
+    _ = &fusion.pichon_sum_gt_f64;
+
+    // fusion: sum_lt
+    _ = &fusion.pichon_sum_lt_i32;
+    _ = &fusion.pichon_sum_lt_i64;
+    _ = &fusion.pichon_sum_lt_f64;
+
+    // fusion: count_gt
+    _ = &fusion.pichon_count_gt_i32;
+    _ = &fusion.pichon_count_gt_i64;
+    _ = &fusion.pichon_count_gt_f64;
+
+    // fusion: count_lt
+    _ = &fusion.pichon_count_lt_i32;
+    _ = &fusion.pichon_count_lt_i64;
+    _ = &fusion.pichon_count_lt_f64;
 }
 
 // Tests

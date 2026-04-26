@@ -88,4 +88,36 @@ void pichon_mul_s_i32(const int32_t* a, size_t len, int32_t scalar, int32_t* out
 void pichon_mul_s_i64(const int64_t* a, size_t len, int64_t scalar, int64_t* out);
 void pichon_mul_s_f64(const double* a, size_t len, double scalar, double* out);
 
+// -----------------------------------------------------------------------------
+// Fusion: sum_gt (filter > threshold, then sum)
+// -----------------------------------------------------------------------------
+
+int64_t pichon_sum_gt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_sum_gt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_sum_gt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: sum_lt (filter < threshold, then sum)
+// -----------------------------------------------------------------------------
+
+int64_t pichon_sum_lt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+int64_t pichon_sum_lt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+double  pichon_sum_lt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: count_gt (count where > threshold)
+// -----------------------------------------------------------------------------
+
+size_t pichon_count_gt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+size_t pichon_count_gt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+size_t pichon_count_gt_f64(const double* ptr, size_t len, double threshold);
+
+// -----------------------------------------------------------------------------
+// Fusion: count_lt (count where < threshold)
+// -----------------------------------------------------------------------------
+
+size_t pichon_count_lt_i32(const int32_t* ptr, size_t len, int32_t threshold);
+size_t pichon_count_lt_i64(const int64_t* ptr, size_t len, int64_t threshold);
+size_t pichon_count_lt_f64(const double* ptr, size_t len, double threshold);
+
 #endif // PICHON_H
