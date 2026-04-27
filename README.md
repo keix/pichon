@@ -58,6 +58,13 @@ Fusion (filter > threshold, then reduce) on 10M elements:
 
 Vectorization moves computation into registers. Fusion removes memory traffic.
 
+## Contract
+- All operations require contiguous memory.
+- Input arrays must have identical lengths.
+- In-place operations are only allowed where explicitly documented.
+- The C layer performs no bounds checking.
+- Violating these conditions results in undefined behavior.
+
 ## Build
 
 ```bash
@@ -121,7 +128,7 @@ python/
 ├── pichon.py    # human-friendly API
 └── binding.py   # raw C ABI binding
 
-bench/               # benchmarks
+bench/           # benchmarks
 ```
 
 ## License
