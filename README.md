@@ -17,7 +17,7 @@ Instead of iterating over Python objects, it operates on contiguous memory using
 - No pointer chasing
 - Single-pass execution
 
-Performance comes from walking memory once.
+Performance comes from walking memory once.  
 The model enables efficient SoA layouts and SIMD execution.
 
 ### Benchmark
@@ -26,9 +26,9 @@ Reduce (sum) on 10M elements:
 
 | type | Python | Pichon | speedup |
 |------|--------|--------|---------|
-| i32  | 40 ms  | 2.5 ms | 16x     |
-| i64  | 40 ms  | 3.8 ms | 11x     |
-| f64  | 30 ms  | 4.0 ms | 8x      |
+| i32  | 38 ms  | 1.9 ms | 20x     |
+| i64  | 38 ms  | 3.5 ms | 11x     |
+| f64  | 28 ms  | 3.5 ms | 8x      |
 
 Fusion (filter > threshold, then reduce) on 10M elements:
 
@@ -36,25 +36,25 @@ Fusion (filter > threshold, then reduce) on 10M elements:
 
 | type | Python | 2-pass | fusion | speedup |
 |------|--------|--------|--------|---------|
-| i32  | 171 ms | 4.0 ms | 2.4 ms | 73x     |
-| i64  | 174 ms | 11 ms  | 4.2 ms | 41x     |
-| f64  | 147 ms | 8.5 ms | 3.9 ms | 38x     |
+| i32  | 170 ms | 4.0 ms | 2.2 ms | 77x     |
+| i64  | 170 ms | 7.3 ms | 3.6 ms | 47x     |
+| f64  | 147 ms | 8.0 ms | 3.5 ms | 42x     |
 
 **min_gt**
 
 | type | Python | 2-pass | fusion | speedup |
 |------|--------|--------|--------|---------|
-| i32  | 199 ms | 4.9 ms | 2.2 ms | 90x     |
-| i64  | 197 ms | 9.3 ms | 6.5 ms | 30x     |
-| f64  | 184 ms | 11 ms  | 6.1 ms | 30x     |
+| i32  | 195 ms | 3.9 ms | 2.0 ms | 98x     |
+| i64  | 195 ms | 8.0 ms | 4.5 ms | 43x     |
+| f64  | 182 ms | 10 ms  | 4.9 ms | 37x     |
 
 **max_gt**
 
 | type | Python | 2-pass | fusion | speedup |
 |------|--------|--------|--------|---------|
-| i32  | 190 ms | 4.0 ms | 2.1 ms | 91x     |
-| i64  | 190 ms | 11 ms  | 6.2 ms | 31x     |
-| f64  | 176 ms | 12 ms  | 6.2 ms | 29x     |
+| i32  | 190 ms | 3.9 ms | 2.0 ms | 95x     |
+| i64  | 190 ms | 7.8 ms | 4.5 ms | 42x     |
+| f64  | 175 ms | 9.7 ms | 4.8 ms | 37x     |
 
 Vectorization moves computation into registers. Fusion removes memory traffic.
 

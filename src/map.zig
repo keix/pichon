@@ -4,44 +4,34 @@
 // Element-wise transformations.
 // =============================================================================
 
+const simd = @import("simd.zig");
+
 // -----------------------------------------------------------------------------
 // Generic implementations (internal)
 // -----------------------------------------------------------------------------
 
-fn addGeneric(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] + b[i];
-    }
+fn add(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
+    simd.addVec(T, a, b, out, len);
 }
 
-fn subGeneric(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] - b[i];
-    }
+fn sub(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
+    simd.subVec(T, a, b, out, len);
 }
 
-fn mulGeneric(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] * b[i];
-    }
+fn mul(comptime T: type, a: [*]const T, b: [*]const T, len: usize, out: [*]T) void {
+    simd.mulVec(T, a, b, out, len);
 }
 
-fn addScalarGeneric(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] + scalar;
-    }
+fn addScalar(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
+    simd.addScalarVec(T, a, scalar, out, len);
 }
 
-fn subScalarGeneric(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] - scalar;
-    }
+fn subScalar(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
+    simd.subScalarVec(T, a, scalar, out, len);
 }
 
-fn mulScalarGeneric(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
-    for (0..len) |i| {
-        out[i] = a[i] * scalar;
-    }
+fn mulScalar(comptime T: type, a: [*]const T, len: usize, scalar: T, out: [*]T) void {
+    simd.mulScalarVec(T, a, scalar, out, len);
 }
 
 // -----------------------------------------------------------------------------
@@ -49,15 +39,15 @@ fn mulScalarGeneric(comptime T: type, a: [*]const T, len: usize, scalar: T, out:
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_add_i32(a: [*]const i32, b: [*]const i32, len: usize, out: [*]i32) void {
-    addGeneric(i32, a, b, len, out);
+    add(i32, a, b, len, out);
 }
 
 pub export fn pichon_add_i64(a: [*]const i64, b: [*]const i64, len: usize, out: [*]i64) void {
-    addGeneric(i64, a, b, len, out);
+    add(i64, a, b, len, out);
 }
 
 pub export fn pichon_add_f64(a: [*]const f64, b: [*]const f64, len: usize, out: [*]f64) void {
-    addGeneric(f64, a, b, len, out);
+    add(f64, a, b, len, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -65,15 +55,15 @@ pub export fn pichon_add_f64(a: [*]const f64, b: [*]const f64, len: usize, out: 
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_sub_i32(a: [*]const i32, b: [*]const i32, len: usize, out: [*]i32) void {
-    subGeneric(i32, a, b, len, out);
+    sub(i32, a, b, len, out);
 }
 
 pub export fn pichon_sub_i64(a: [*]const i64, b: [*]const i64, len: usize, out: [*]i64) void {
-    subGeneric(i64, a, b, len, out);
+    sub(i64, a, b, len, out);
 }
 
 pub export fn pichon_sub_f64(a: [*]const f64, b: [*]const f64, len: usize, out: [*]f64) void {
-    subGeneric(f64, a, b, len, out);
+    sub(f64, a, b, len, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -81,15 +71,15 @@ pub export fn pichon_sub_f64(a: [*]const f64, b: [*]const f64, len: usize, out: 
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_mul_i32(a: [*]const i32, b: [*]const i32, len: usize, out: [*]i32) void {
-    mulGeneric(i32, a, b, len, out);
+    mul(i32, a, b, len, out);
 }
 
 pub export fn pichon_mul_i64(a: [*]const i64, b: [*]const i64, len: usize, out: [*]i64) void {
-    mulGeneric(i64, a, b, len, out);
+    mul(i64, a, b, len, out);
 }
 
 pub export fn pichon_mul_f64(a: [*]const f64, b: [*]const f64, len: usize, out: [*]f64) void {
-    mulGeneric(f64, a, b, len, out);
+    mul(f64, a, b, len, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -97,15 +87,15 @@ pub export fn pichon_mul_f64(a: [*]const f64, b: [*]const f64, len: usize, out: 
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_add_s_i32(a: [*]const i32, len: usize, scalar: i32, out: [*]i32) void {
-    addScalarGeneric(i32, a, len, scalar, out);
+    addScalar(i32, a, len, scalar, out);
 }
 
 pub export fn pichon_add_s_i64(a: [*]const i64, len: usize, scalar: i64, out: [*]i64) void {
-    addScalarGeneric(i64, a, len, scalar, out);
+    addScalar(i64, a, len, scalar, out);
 }
 
 pub export fn pichon_add_s_f64(a: [*]const f64, len: usize, scalar: f64, out: [*]f64) void {
-    addScalarGeneric(f64, a, len, scalar, out);
+    addScalar(f64, a, len, scalar, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -113,15 +103,15 @@ pub export fn pichon_add_s_f64(a: [*]const f64, len: usize, scalar: f64, out: [*
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_sub_s_i32(a: [*]const i32, len: usize, scalar: i32, out: [*]i32) void {
-    subScalarGeneric(i32, a, len, scalar, out);
+    subScalar(i32, a, len, scalar, out);
 }
 
 pub export fn pichon_sub_s_i64(a: [*]const i64, len: usize, scalar: i64, out: [*]i64) void {
-    subScalarGeneric(i64, a, len, scalar, out);
+    subScalar(i64, a, len, scalar, out);
 }
 
 pub export fn pichon_sub_s_f64(a: [*]const f64, len: usize, scalar: f64, out: [*]f64) void {
-    subScalarGeneric(f64, a, len, scalar, out);
+    subScalar(f64, a, len, scalar, out);
 }
 
 // -----------------------------------------------------------------------------
@@ -129,15 +119,15 @@ pub export fn pichon_sub_s_f64(a: [*]const f64, len: usize, scalar: f64, out: [*
 // -----------------------------------------------------------------------------
 
 pub export fn pichon_mul_s_i32(a: [*]const i32, len: usize, scalar: i32, out: [*]i32) void {
-    mulScalarGeneric(i32, a, len, scalar, out);
+    mulScalar(i32, a, len, scalar, out);
 }
 
 pub export fn pichon_mul_s_i64(a: [*]const i64, len: usize, scalar: i64, out: [*]i64) void {
-    mulScalarGeneric(i64, a, len, scalar, out);
+    mulScalar(i64, a, len, scalar, out);
 }
 
 pub export fn pichon_mul_s_f64(a: [*]const f64, len: usize, scalar: f64, out: [*]f64) void {
-    mulScalarGeneric(f64, a, len, scalar, out);
+    mulScalar(f64, a, len, scalar, out);
 }
 
 // -----------------------------------------------------------------------------
