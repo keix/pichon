@@ -313,6 +313,100 @@ pub fn minLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
 }
 
 // -----------------------------------------------------------------------------
+// Map operations (element-wise)
+// -----------------------------------------------------------------------------
+
+pub fn addVec(comptime T: type, a: [*]const T, b: [*]const T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        const vb: Vec(T) = b[i..][0..L].*;
+        out[i..][0..L].* = va + vb;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] + b[i];
+    }
+}
+
+pub fn subVec(comptime T: type, a: [*]const T, b: [*]const T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        const vb: Vec(T) = b[i..][0..L].*;
+        out[i..][0..L].* = va - vb;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] - b[i];
+    }
+}
+
+pub fn mulVec(comptime T: type, a: [*]const T, b: [*]const T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        const vb: Vec(T) = b[i..][0..L].*;
+        out[i..][0..L].* = va * vb;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] * b[i];
+    }
+}
+
+pub fn addScalarVec(comptime T: type, a: [*]const T, scalar: T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    const vs: Vec(T) = splat(T, scalar);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        out[i..][0..L].* = va + vs;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] + scalar;
+    }
+}
+
+pub fn subScalarVec(comptime T: type, a: [*]const T, scalar: T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    const vs: Vec(T) = splat(T, scalar);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        out[i..][0..L].* = va - vs;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] - scalar;
+    }
+}
+
+pub fn mulScalarVec(comptime T: type, a: [*]const T, scalar: T, out: [*]T, len: usize) void {
+    const L = comptime lanes(T);
+    const vs: Vec(T) = splat(T, scalar);
+    var i: usize = 0;
+
+    while (i + L <= len) : (i += L) {
+        const va: Vec(T) = a[i..][0..L].*;
+        out[i..][0..L].* = va * vs;
+    }
+
+    while (i < len) : (i += 1) {
+        out[i] = a[i] * scalar;
+    }
+}
+
+// -----------------------------------------------------------------------------
 // Conditional max (> threshold)
 // -----------------------------------------------------------------------------
 

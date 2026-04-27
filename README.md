@@ -17,7 +17,7 @@ Instead of iterating over Python objects, it operates on contiguous memory using
 - No pointer chasing
 - Single-pass execution
 
-Performance comes from walking memory once.
+Performance comes from walking memory once.  
 The model enables efficient SoA layouts and SIMD execution.
 
 ### Benchmark
