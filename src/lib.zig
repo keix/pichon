@@ -9,7 +9,6 @@ pub const reduce = @import("reduce.zig");
 pub const filter = @import("filter.zig");
 pub const map = @import("map.zig");
 pub const fusion = @import("fusion.zig");
-pub const layout = @import("layout.zig");
 pub const err = @import("error.zig");
 
 // Force symbols to be included in the library
@@ -33,6 +32,9 @@ comptime {
     _ = &filter.pichon_filter_gt_i32;
     _ = &filter.pichon_filter_gt_i64;
     _ = &filter.pichon_filter_gt_f64;
+    _ = &filter.pichon_filter_lt_i32;
+    _ = &filter.pichon_filter_lt_i64;
+    _ = &filter.pichon_filter_lt_f64;
 
     // map: binary
     _ = &map.pichon_add_i32;

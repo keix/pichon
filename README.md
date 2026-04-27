@@ -69,7 +69,7 @@ zig build -Doptimize=ReleaseFast
 | Category | Functions |
 |----------|-----------|
 | reduce | `pichon_sum_{i32,i64,f64}`<br>`pichon_min_{i32,i64,f64}`<br>`pichon_max_{i32,i64,f64}` |
-| filter | `pichon_filter_gt_{i32,i64,f64}` |
+| filter | `pichon_filter_gt_{i32,i64,f64}`<br>`pichon_filter_lt_{i32,i64,f64}` |
 | map    | `pichon_add_{i32,i64,f64}`<br>`pichon_sub_{i32,i64,f64}`<br>`pichon_mul_{i32,i64,f64}` |
 | map (scalar) | `pichon_add_s_{i32,i64,f64}`<br>`pichon_sub_s_{i32,i64,f64}`<br>`pichon_mul_s_{i32,i64,f64}` |
 | fusion | `pichon_sum_gt_{i32,i64,f64}`<br>`pichon_sum_lt_{i32,i64,f64}`<br>`pichon_count_gt_{i32,i64,f64}`<br>`pichon_count_lt_{i32,i64,f64}`<br>`pichon_min_gt_{i32,i64,f64}`<br>`pichon_min_lt_{i32,i64,f64}`<br>`pichon_max_gt_{i32,i64,f64}`<br>`pichon_max_lt_{i32,i64,f64}` |
@@ -77,32 +77,29 @@ zig build -Doptimize=ReleaseFast
 ## Usage
 
 ```python
-from python.binding import lib, c_int32
+import pichon
+from ctypes import c_int32
 
 data = (c_int32 * 5)(10, 20, 30, 40, 50)
 
 # reduce
-lib.pichon_sum_i32(data, 5)  # 150
+pichon.sum_i32(data)  # 150
 
 # filter
-out = (c_int32 * 5)()
-count = lib.pichon_filter_gt_i32(data, 5, out, 25)
+out, count = pichon.filter_gt_i32(data, 25)
 print(list(out[:count]))  # [30, 40, 50]
 
 # map
 a = (c_int32 * 3)(100, 200, 300)
 b = (c_int32 * 3)(10, 20, 30)
-out = (c_int32 * 3)()
-lib.pichon_mul_i32(a, b, 3, out)
-print(list(out))  # [1000, 4000, 9000]
+print(list(pichon.mul_i32(a, b)))  # [1000, 4000, 9000]
 
-# map scalar (in-place)
-lib.pichon_mul_s_i32(a, 3, 2, a)
-print(list(a))  # [200, 400, 600]
+# map scalar
+print(list(pichon.mul_s_i32(a, 2)))  # [200, 400, 600]
 
 # fusion (filter + reduce in single pass)
-lib.pichon_sum_gt_i32(data, 5, 25)    # 120 (30+40+50)
-lib.pichon_count_gt_i32(data, 5, 25)  # 3
+pichon.sum_gt_i32(data, 25)    # 120 (30+40+50)
+pichon.count_gt_i32(data, 25)  # 3
 ```
 
 ## Structure
@@ -112,18 +109,19 @@ src/
 ├── lib.zig      # entry point
 ├── simd.zig     # SIMD primitives
 ├── reduce.zig   # sum, min, max
-├── filter.zig   # filter_gt
+├── filter.zig   # filter_gt, filter_lt
 ├── map.zig      # add, sub, mul, add_s, sub_s, mul_s
 ├── fusion.zig   # sum_gt/lt, count_gt/lt, min_gt/lt, max_gt/lt
-├── layout.zig
-└── error.zig
+└── error.zig    # error codes for C ABI
 
 include/
 └── pichon.h     # C ABI
 
 python/
-├── binding.py   # ctypes binding
-└── bench.py     # benchmark
+├── pichon.py    # human-friendly API
+└── binding.py   # raw C ABI binding
+
+bench/               # benchmarks
 ```
 
 ## License
