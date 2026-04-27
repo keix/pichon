@@ -2,6 +2,10 @@
 Benchmark: Fusion (Python vs Pichon)
 """
 
+import sys
+
+sys.path.insert(0, "python")
+
 import time
 from ctypes import c_int32, c_int64, c_double
 from binding import lib
@@ -28,7 +32,14 @@ def bench_sum_gt_i32():
     fusion_result = lib.pichon_sum_gt_i32(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_sum_gt_i64():
@@ -49,7 +60,14 @@ def bench_sum_gt_i64():
     fusion_result = lib.pichon_sum_gt_i64(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_sum_gt_f64():
@@ -71,7 +89,14 @@ def bench_sum_gt_f64():
     fusion_result = lib.pichon_sum_gt_f64(c_array, N, threshold)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_min_gt_i32():
@@ -92,7 +117,14 @@ def bench_min_gt_i32():
     fusion_result = lib.pichon_min_gt_i32(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_min_gt_i64():
@@ -113,7 +145,14 @@ def bench_min_gt_i64():
     fusion_result = lib.pichon_min_gt_i64(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_min_gt_f64():
@@ -135,7 +174,14 @@ def bench_min_gt_f64():
     fusion_result = lib.pichon_min_gt_f64(c_array, N, threshold)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_max_gt_i32():
@@ -156,7 +202,14 @@ def bench_max_gt_i32():
     fusion_result = lib.pichon_max_gt_i32(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_max_gt_i64():
@@ -177,7 +230,14 @@ def bench_max_gt_i64():
     fusion_result = lib.pichon_max_gt_i64(c_array, N, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def bench_max_gt_f64():
@@ -199,38 +259,58 @@ def bench_max_gt_f64():
     fusion_result = lib.pichon_max_gt_f64(c_array, N, threshold)
     fusion_time = time.perf_counter() - t0
 
-    return py_time, two_pass_time, fusion_time, py_result, two_pass_result, fusion_result
+    return (
+        py_time,
+        two_pass_time,
+        fusion_time,
+        py_result,
+        two_pass_result,
+        fusion_result,
+    )
 
 
 def run_benchmarks(title, benchmarks):
     print(f"\n{title}")
-    print(f"{'type':<4} | {'Python':>10} | {'2-pass':>10} | {'fusion':>10} | {'speedup':>8} | {'verify'}")
+    print(
+        f"{'type':<4} | {'Python':>10} | {'2-pass':>10} | {'fusion':>10} | {'speedup':>8} | {'verify'}"
+    )
     print("-" * 70)
 
     for name, bench in benchmarks:
         py_t, two_t, fus_t, py_r, two_r, fus_r = bench()
         match = "ok" if py_r == two_r == fus_r else "MISMATCH"
         speedup = py_t / fus_t
-        print(f"{name:<4} | {py_t*1000:>8.2f}ms | {two_t*1000:>8.2f}ms | {fus_t*1000:>8.2f}ms | {speedup:>7.0f}x | {match}")
+        print(
+            f"{name:<4} | {py_t * 1000:>8.2f}ms | {two_t * 1000:>8.2f}ms | {fus_t * 1000:>8.2f}ms | {speedup:>7.0f}x | {match}"
+        )
 
 
 if __name__ == "__main__":
     print(f"N = {N:,}, threshold = {THRESHOLD:,} (filter ~50%)")
 
-    run_benchmarks("sum_gt", [
-        ("i32", bench_sum_gt_i32),
-        ("i64", bench_sum_gt_i64),
-        ("f64", bench_sum_gt_f64),
-    ])
+    run_benchmarks(
+        "sum_gt",
+        [
+            ("i32", bench_sum_gt_i32),
+            ("i64", bench_sum_gt_i64),
+            ("f64", bench_sum_gt_f64),
+        ],
+    )
 
-    run_benchmarks("min_gt", [
-        ("i32", bench_min_gt_i32),
-        ("i64", bench_min_gt_i64),
-        ("f64", bench_min_gt_f64),
-    ])
+    run_benchmarks(
+        "min_gt",
+        [
+            ("i32", bench_min_gt_i32),
+            ("i64", bench_min_gt_i64),
+            ("f64", bench_min_gt_f64),
+        ],
+    )
 
-    run_benchmarks("max_gt", [
-        ("i32", bench_max_gt_i32),
-        ("i64", bench_max_gt_i64),
-        ("f64", bench_max_gt_f64),
-    ])
+    run_benchmarks(
+        "max_gt",
+        [
+            ("i32", bench_max_gt_i32),
+            ("i64", bench_max_gt_i64),
+            ("f64", bench_max_gt_f64),
+        ],
+    )
