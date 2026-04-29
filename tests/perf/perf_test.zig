@@ -1,24 +1,41 @@
 // =============================================================================
-// Performance Regression Tests
+// Performance: Regression Tests
 // =============================================================================
-// These tests fail if performance degrades beyond acceptable thresholds.
+// Purpose: Fail if performance degrades beyond thresholds
+//
 // "Slow = Broken" for Pichon.
+//
+// Configuration:
+//   N = 10,000,000 elements
+//   Iterations = 3 (averaged)
+//
+// Output format:
+//   "{operation}: {total_ns}ns total, {ns_per_elem}ns/elem"
+//   - total_ns: average time across iterations
+//   - ns_per_elem: total_ns / N (must be <= threshold)
+//
+// Thresholds (nanoseconds per element):
+//   - reduce (sum):       1 ns/elem
+//   - fusion (filter+reduce): 2 ns/elem
+//   - map (vector ops):   3 ns/elem
+//
+// IMPORTANT: Only runs in ReleaseFast mode (skipped otherwise)
+//
+// Run: zig build perf -Doptimize=ReleaseFast
 // =============================================================================
 
 const std = @import("std");
-const simd = @import("simd.zig");
+const pichon = @import("pichon");
+const simd = pichon.simd;
 const testing = std.testing;
+const builtin = @import("builtin");
 
 // =============================================================================
 // Configuration
 // =============================================================================
 
-const builtin = @import("builtin");
-
 const N: usize = 10_000_000;
 
-// Performance tests only run in ReleaseFast.
-// This ensures thresholds are meaningful specifications, not approximations.
 fn requireRelease() bool {
     if (builtin.mode != .ReleaseFast) {
         std.log.warn("perf test requires ReleaseFast, skipping", .{});
@@ -28,15 +45,9 @@ fn requireRelease() bool {
 }
 
 // Thresholds in nanoseconds per element (ReleaseFast only)
-// These are the specification - exceeding them means the code is broken.
 const Threshold = struct {
-    // Reduce: ~0.3ns/elem (memory bound)
     sum_ns_per_elem: u64 = 1,
-
-    // Fusion: ~0.5ns/elem (compute + memory)
     fusion_ns_per_elem: u64 = 2,
-
-    // Map: ~1ns/elem (read + write)
     map_ns_per_elem: u64 = 3,
 };
 
@@ -67,7 +78,7 @@ fn allocData(comptime T: type, allocator: std.mem.Allocator, n: usize) ![]T {
 }
 
 // =============================================================================
-// Reduce Performance Tests
+// Reduce Performance
 // =============================================================================
 
 test "perf: sum_i64 within threshold" {
@@ -101,7 +112,7 @@ test "perf: sumWiden_i32 within threshold" {
 }
 
 // =============================================================================
-// Fusion Performance Tests
+// Fusion Performance
 // =============================================================================
 
 test "perf: sumGt_i64 within threshold" {
@@ -153,7 +164,7 @@ test "perf: minGt_i64 within threshold" {
 }
 
 // =============================================================================
-// Map Performance Tests
+// Map Performance
 // =============================================================================
 
 test "perf: addVec_i64 within threshold" {
@@ -201,9 +212,8 @@ test "perf: mulVec_f64 within threshold" {
 }
 
 // =============================================================================
-// Comparative Performance (Fusion vs Separate)
+// Fusion Advantage
 // =============================================================================
-// Fusion should be faster than filter + reduce separately.
 
 test "perf: fusion faster than separate" {
     if (!requireRelease()) return;
@@ -213,16 +223,9 @@ test "perf: fusion faster than separate" {
     defer allocator.free(data);
 
     const t: i64 = @intCast(N / 2);
-
-    // Measure fusion
     const fusion_ns = benchmark(simd.sumGt, .{ i64, data.ptr, N, t }, 3);
-
-    // Measure separate (filter then sum - approximated)
-    // In practice, separate would need intermediate buffer
-    // This test documents the performance advantage of fusion
 
     std.debug.print("\nfusion sumGt: {d}ns\n", .{fusion_ns});
 
-    // Fusion should complete in reasonable time
-    try testing.expect(fusion_ns < N * 5); // 5ns/elem max
+    try testing.expect(fusion_ns < N * 5);
 }

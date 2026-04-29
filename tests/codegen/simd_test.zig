@@ -1,55 +1,56 @@
 // =============================================================================
-// SIMD Guarantee Tests
+// Codegen: SIMD Vectorization
 // =============================================================================
-// Verifies that SIMD vectorization is actually happening.
-// These tests ensure "using SIMD" is part of the specification.
+// Purpose: Verify SIMD vectorization is actually happening
+//
+// Verified guarantees:
+//   - Lane widths: i32=8/4, i64=4/2, f64=4/2 (AVX2/SSE)
+//   - Lane ratios: i32 = 2 * i64, i64 = f64
+//   - Boundary handling: exact multiples, remainders, single vector
+//   - 4x unroll correctness at all boundary conditions
+//   - Horizontal reduction: min, max
+//
+// Run: zig build test
 // =============================================================================
 
 const std = @import("std");
-const simd = @import("simd.zig");
+const pichon = @import("pichon");
+const simd = pichon.simd;
 const testing = std.testing;
 
 // =============================================================================
 // Lane Width Verification
 // =============================================================================
-// Confirms the expected SIMD width for each type.
 
-test "SIMD: i32 uses 8 lanes (AVX2 256-bit)" {
+test "SIMD: i32 uses expected lanes" {
     const lanes = simd.lanes(i32);
-    // AVX2 = 256 bits, i32 = 32 bits → 8 lanes
-    // SSE  = 128 bits, i32 = 32 bits → 4 lanes
+    // AVX2 = 8 lanes, SSE = 4 lanes
     try testing.expect(lanes == 8 or lanes == 4);
 }
 
-test "SIMD: i64 uses 4 lanes (AVX2 256-bit)" {
+test "SIMD: i64 uses expected lanes" {
     const lanes = simd.lanes(i64);
-    // AVX2 = 256 bits, i64 = 64 bits → 4 lanes
-    // SSE  = 128 bits, i64 = 64 bits → 2 lanes
+    // AVX2 = 4 lanes, SSE = 2 lanes
     try testing.expect(lanes == 4 or lanes == 2);
 }
 
-test "SIMD: f64 uses 4 lanes (AVX2 256-bit)" {
+test "SIMD: f64 uses expected lanes" {
     const lanes = simd.lanes(f64);
-    // AVX2 = 256 bits, f64 = 64 bits → 4 lanes
-    // SSE  = 128 bits, f64 = 64 bits → 2 lanes
+    // AVX2 = 4 lanes, SSE = 2 lanes
     try testing.expect(lanes == 4 or lanes == 2);
 }
 
 test "SIMD: lane ratios are correct" {
-    // i32 should have 2x the lanes of i64
     try testing.expectEqual(simd.lanes(i32), simd.lanes(i64) * 2);
-    // i64 and f64 should have the same lanes
     try testing.expectEqual(simd.lanes(i64), simd.lanes(f64));
 }
 
 // =============================================================================
 // Vector Operation Correctness
 // =============================================================================
-// Tests that prove SIMD operations work across lane boundaries.
 
 test "SIMD: sum handles exact vector multiple" {
     const L = simd.lanes(i32);
-    // Create array that's exactly 4 vectors (our unroll factor)
     var data: [L * 4]i32 = undefined;
     for (&data, 0..) |*v, i| {
         v.* = @intCast(i + 1);
@@ -62,8 +63,7 @@ test "SIMD: sum handles exact vector multiple" {
 
 test "SIMD: sum handles non-vector-aligned length" {
     const L = simd.lanes(i32);
-    // Create array that's NOT a multiple of vector width
-    const n = L * 4 + 3; // 3 elements in scalar tail
+    const n = L * 4 + 3;
     var data: [n]i32 = undefined;
     for (&data, 0..) |*v, i| {
         v.* = @intCast(i + 1);
@@ -87,7 +87,7 @@ test "SIMD: sum handles single vector" {
 
 test "SIMD: sum handles less than one vector" {
     const L = simd.lanes(i64);
-    const n = L - 1; // Less than one full vector
+    const n = L - 1;
     var data: [n]i64 = undefined;
     for (&data, 0..) |*v, i| {
         v.* = @intCast(i + 1);
@@ -101,18 +101,16 @@ test "SIMD: sum handles less than one vector" {
 // =============================================================================
 // Unroll Factor Verification
 // =============================================================================
-// Tests that verify the 4x unroll pattern works correctly.
 
 test "SIMD: 4x unroll boundary correctness" {
     const L = simd.lanes(i32);
-    const U = 4 * L; // Unroll factor
+    const U = 4 * L;
 
-    // Test sizes around the unroll boundary
     const sizes = [_]usize{ U - 1, U, U + 1, U * 2, U * 2 + L, U * 3 - 1 };
 
     for (sizes) |size| {
-        const data = try std.testing.allocator.alloc(i32, size);
-        defer std.testing.allocator.free(data);
+        const data = try testing.allocator.alloc(i32, size);
+        defer testing.allocator.free(data);
 
         for (data, 0..) |*v, i| {
             v.* = @intCast(i + 1);
@@ -126,9 +124,8 @@ test "SIMD: 4x unroll boundary correctness" {
 }
 
 // =============================================================================
-// Horizontal Reduction Verification
+// Horizontal Reduction
 // =============================================================================
-// Tests that horizontal SIMD reductions work correctly.
 
 test "SIMD: horizontal min reduction" {
     const data = [_]i32{ 5, 2, 8, 1, 9, 3, 7, 4 };
@@ -143,13 +140,12 @@ test "SIMD: horizontal max reduction" {
 }
 
 // =============================================================================
-// Map Vector Operation Verification
+// Map Vector Operations
 // =============================================================================
-// Tests that map operations vectorize correctly.
 
 test "SIMD: addVec across vector boundary" {
     const L = simd.lanes(i64);
-    const n = L * 2 + 1; // Crosses vector boundary with remainder
+    const n = L * 2 + 1;
 
     var a: [n]i64 = undefined;
     var b: [n]i64 = undefined;

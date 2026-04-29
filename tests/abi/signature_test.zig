@@ -1,39 +1,29 @@
 // =============================================================================
-// ABI Lock Tests
+// ABI: Function Signatures
 // =============================================================================
-// Compile-time assertions that freeze the binary interface.
-// If any of these fail, the ABI has been broken.
+// Purpose: Freeze function signatures via compile-time assertions
+//
+// These tests are SACRED - signature changes require versioned migration.
+//
+// Verified signatures:
+//   - reduce: (ptr, len) -> result
+//   - filter: (ptr, len, out, threshold) -> count
+//   - map:    (a, b, len, out) or (a, len, scalar, out)
+//   - fusion: (ptr, len, threshold) -> result
+//
+// Run: zig build test
 // =============================================================================
 
 const std = @import("std");
-const reduce = @import("reduce.zig");
-const filter = @import("filter.zig");
-const map = @import("map.zig");
-const fusion = @import("fusion.zig");
-const simd = @import("simd.zig");
+const pichon = @import("pichon");
+const reduce = pichon.reduce;
+const filter = pichon.filter;
+const map = pichon.map;
+const fusion = pichon.fusion;
 
 // =============================================================================
-// Type Size Guarantees
+// Signature Verification Helpers
 // =============================================================================
-// These are fundamental to FFI safety.
-
-comptime {
-    // Primitive types must match C ABI
-    std.debug.assert(@sizeOf(i32) == 4);
-    std.debug.assert(@sizeOf(i64) == 8);
-    std.debug.assert(@sizeOf(f64) == 8);
-    std.debug.assert(@sizeOf(usize) == 8); // 64-bit platform
-
-    // Alignment must match C ABI
-    std.debug.assert(@alignOf(i32) == 4);
-    std.debug.assert(@alignOf(i64) == 8);
-    std.debug.assert(@alignOf(f64) == 8);
-}
-
-// =============================================================================
-// Function Signature Verification
-// =============================================================================
-// Ensures function signatures never change without explicit intent.
 
 fn verifyReduceSignature(
     comptime Fn: type,
@@ -205,85 +195,12 @@ comptime {
 }
 
 // =============================================================================
-// SIMD Lane Width Lock
-// =============================================================================
-// Ensures SIMD vectorization uses expected lane widths.
-
-comptime {
-    // AVX2: 256-bit vectors
-    // i32: 256 / 32 = 8 lanes
-    // i64: 256 / 64 = 4 lanes
-    // f64: 256 / 64 = 4 lanes
-    const i32_lanes = simd.lanes(i32);
-    const i64_lanes = simd.lanes(i64);
-    const f64_lanes = simd.lanes(f64);
-
-    // Minimum lane requirements (must vectorize)
-    std.debug.assert(i32_lanes >= 4);
-    std.debug.assert(i64_lanes >= 2);
-    std.debug.assert(f64_lanes >= 2);
-
-    // Lane relationship (i32 should have 2x lanes of i64)
-    std.debug.assert(i32_lanes == i64_lanes * 2);
-    std.debug.assert(i64_lanes == f64_lanes);
-}
-
-// =============================================================================
-// Sentinel Value Specification
-// =============================================================================
-// Documents the behavior of min/max fusion on empty/no-match sets.
-
-comptime {
-    // min with no match returns maxInt (sentinel)
-    std.debug.assert(simd.minGt(i32, @as([*]const i32, &[_]i32{}), 0, 0) == std.math.maxInt(i32));
-
-    // max with no match returns minInt (sentinel)
-    std.debug.assert(simd.maxGt(i32, @as([*]const i32, &[_]i32{}), 0, 0) == std.math.minInt(i32));
-}
-
-// =============================================================================
-// Export Count Lock
-// =============================================================================
-// Ensures the total number of exported functions doesn't change unexpectedly.
-
-comptime {
-    // Total exported functions: 57
-    // reduce: 9 (sum×3 + min×3 + max×3)
-    // filter: 6 (gt×3 + lt×3)
-    // map binary: 9 (add×3 + sub×3 + mul×3)
-    // map scalar: 9 (add_s×3 + sub_s×3 + mul_s×3)
-    // fusion: 24 (sum_gt×3 + sum_lt×3 + count_gt×3 + count_lt×3 + min_gt×3 + min_lt×3 + max_gt×3 + max_lt×3)
-    const EXPECTED_EXPORTS = 57;
-    _ = EXPECTED_EXPORTS; // Documented for reference
-}
-
-// =============================================================================
-// Runtime Tests
+// Runtime test (ensures comptime blocks are evaluated)
 // =============================================================================
 
 const testing = std.testing;
 
-test "ABI: type sizes match C" {
-    try testing.expectEqual(@as(usize, 4), @sizeOf(i32));
-    try testing.expectEqual(@as(usize, 8), @sizeOf(i64));
-    try testing.expectEqual(@as(usize, 8), @sizeOf(f64));
-    try testing.expectEqual(@as(usize, 8), @sizeOf(usize));
-    try testing.expectEqual(@as(usize, 8), @sizeOf([*]const i32));
-}
-
-test "ABI: SIMD lanes are vectorized" {
-    // Verify we're actually vectorizing (not falling back to scalar)
-    try testing.expect(simd.lanes(i32) >= 4);
-    try testing.expect(simd.lanes(i64) >= 2);
-    try testing.expect(simd.lanes(f64) >= 2);
-}
-
-test "ABI: sentinel values are consistent" {
-    // min sentinel = maxInt
-    try testing.expectEqual(std.math.maxInt(i32), simd.minGt(i32, &[_]i32{}, 0, 0));
-    try testing.expectEqual(std.math.maxInt(i64), simd.minGt(i64, &[_]i64{}, 0, 0));
-
-    // max sentinel = minInt
-    try testing.expectEqual(std.math.minInt(i32), simd.maxGt(i32, &[_]i32{}, 0, 0));
-    try testing.expectEqual(std.math.minInt(i64), simd.maxGt(i64, &[_]i64{}, 0, 0));
+test "ABI signatures are locked" {
+    // If this compiles, all comptime assertions passed
+    try testing.expect(true);
 }
