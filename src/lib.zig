@@ -9,7 +9,6 @@ pub const reduce = @import("reduce.zig");
 pub const filter = @import("filter.zig");
 pub const map = @import("map.zig");
 pub const fusion = @import("fusion.zig");
-pub const err = @import("error.zig");
 
 // Force symbols to be included in the library
 comptime {
