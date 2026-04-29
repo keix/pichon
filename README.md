@@ -134,8 +134,7 @@ src/
 ├── reduce.zig   # sum, min, max
 ├── filter.zig   # filter_gt, filter_lt
 ├── map.zig      # add, sub, mul, add_s, sub_s, mul_s
-├── fusion.zig   # sum_gt/lt, count_gt/lt, min_gt/lt, max_gt/lt
-└── error.zig    # error codes for C ABI
+└── fusion.zig   # sum_gt/lt, count_gt/lt, min_gt/lt, max_gt/lt
 
 include/
 └── pichon.h     # C ABI
