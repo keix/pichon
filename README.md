@@ -65,6 +65,21 @@ Vectorization moves computation into registers. Fusion removes memory traffic.
 - The C layer performs no bounds checking.
 - Violating these conditions results in undefined behavior.
 
+## Spec / Testing
+Tests define and verify observable behavior.
+
+Run:
+
+```bash
+zig build test --summary all
+```
+
+The test suite covers:
+
+- behavior (correctness)
+- ABI stability
+- codegen assumptions
+
 ## Build
 
 ```bash
