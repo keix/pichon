@@ -65,6 +65,21 @@ Vectorization moves computation into registers. Fusion removes memory traffic.
 - The C layer performs no bounds checking.
 - Violating these conditions results in undefined behavior.
 
+## Spec / Testing
+Tests define and verify observable behavior.
+
+Run:
+
+```bash
+zig build test --summary all
+```
+
+The test suite covers:
+
+- behavior (correctness)
+- ABI stability
+- codegen assumptions
+
 ## Build
 
 ```bash
@@ -72,14 +87,15 @@ zig build -Doptimize=ReleaseFast
 ```
 
 ## API
+Low-level bindings are available under `pichon._native` for advanced use.
 
 | Category | Functions |
 |----------|-----------|
-| reduce | `pichon_sum_{i32,i64,f64}`<br>`pichon_min_{i32,i64,f64}`<br>`pichon_max_{i32,i64,f64}` |
-| filter | `pichon_filter_gt_{i32,i64,f64}`<br>`pichon_filter_lt_{i32,i64,f64}` |
-| map    | `pichon_add_{i32,i64,f64}`<br>`pichon_sub_{i32,i64,f64}`<br>`pichon_mul_{i32,i64,f64}` |
-| map (scalar) | `pichon_add_s_{i32,i64,f64}`<br>`pichon_sub_s_{i32,i64,f64}`<br>`pichon_mul_s_{i32,i64,f64}` |
-| fusion | `pichon_sum_gt_{i32,i64,f64}`<br>`pichon_sum_lt_{i32,i64,f64}`<br>`pichon_count_gt_{i32,i64,f64}`<br>`pichon_count_lt_{i32,i64,f64}`<br>`pichon_min_gt_{i32,i64,f64}`<br>`pichon_min_lt_{i32,i64,f64}`<br>`pichon_max_gt_{i32,i64,f64}`<br>`pichon_max_lt_{i32,i64,f64}` |
+| reduce | `sum_{i32,i64,f64}` `min_{i32,i64,f64}` `max_{i32,i64,f64}` |
+| filter | `filter_gt_{i32,i64,f64}` `filter_lt_{i32,i64,f64}` |
+| map    | `add_{i32,i64,f64}` `sub_{i32,i64,f64}` `mul_{i32,i64,f64}` |
+| map (scalar) | `add_s_{i32,i64,f64}` `sub_s_{i32,i64,f64}` `mul_s_{i32,i64,f64}` |
+| fusion | `sum_gt_{i32,i64,f64}` `sum_lt_{i32,i64,f64}` `count_gt_{i32,i64,f64}` `count_lt_{i32,i64,f64}` `min_gt_{i32,i64,f64}` `min_lt_{i32,i64,f64}` `max_gt_{i32,i64,f64}` `max_lt_{i32,i64,f64}` |
 
 ## Usage
 
@@ -124,9 +140,9 @@ src/
 include/
 └── pichon.h     # C ABI
 
-python/
-├── pichon.py    # human-friendly API
-└── binding.py   # raw C ABI binding
+python/pichon/
+├── __init__.py  # public API
+└── _native.py   # C ABI binding
 
 bench/           # benchmarks
 ```
