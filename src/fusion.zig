@@ -139,7 +139,8 @@ pub export fn pichon_max_lt_f64(ptr: [*]const f64, len: usize, threshold: f64) f
 // Tests
 // -----------------------------------------------------------------------------
 
-const testing = @import("std").testing;
+const std = @import("std");
+const testing = std.testing;
 
 test "sum_gt_i32" {
     const data = [_]i32{ 10, 50, 30, 80, 20 };
@@ -305,4 +306,89 @@ test "count_lt_f64" {
     const count = pichon_count_lt_f64(&data, data.len, 3.0);
     // {1.5, 2.5} = 2
     try testing.expectEqual(@as(usize, 2), count);
+}
+
+// Edge cases: empty array
+test "sum_gt_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_sum_gt_i32(&data, 0, 0);
+    try testing.expectEqual(@as(i64, 0), result);
+}
+
+test "count_gt_i32 empty" {
+    const data = [_]i32{};
+    const count = pichon_count_gt_i32(&data, 0, 0);
+    try testing.expectEqual(@as(usize, 0), count);
+}
+
+test "min_gt_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_min_gt_i32(&data, 0, 0);
+    // Empty set: returns minIdentity (maxInt)
+    try testing.expectEqual(std.math.maxInt(i32), result);
+}
+
+test "max_gt_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_max_gt_i32(&data, 0, 0);
+    // Empty set: returns maxIdentity (minInt)
+    try testing.expectEqual(std.math.minInt(i32), result);
+}
+
+// Edge cases: single element
+test "sum_gt_i32 single match" {
+    const data = [_]i32{50};
+    const result = pichon_sum_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(i64, 50), result);
+}
+
+test "sum_gt_i32 single no match" {
+    const data = [_]i32{10};
+    const result = pichon_sum_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(i64, 0), result);
+}
+
+test "count_gt_i32 single match" {
+    const data = [_]i32{50};
+    const count = pichon_count_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(usize, 1), count);
+}
+
+test "count_gt_i32 single no match" {
+    const data = [_]i32{10};
+    const count = pichon_count_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(usize, 0), count);
+}
+
+test "min_gt_i32 single match" {
+    const data = [_]i32{50};
+    const result = pichon_min_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(i32, 50), result);
+}
+
+test "max_gt_i32 single match" {
+    const data = [_]i32{50};
+    const result = pichon_max_gt_i32(&data, 1, 25);
+    try testing.expectEqual(@as(i32, 50), result);
+}
+
+// Edge cases: none match
+test "sum_gt_i32 none match" {
+    const data = [_]i32{ 1, 2, 3, 4, 5 };
+    const result = pichon_sum_gt_i32(&data, data.len, 100);
+    try testing.expectEqual(@as(i64, 0), result);
+}
+
+test "min_gt_i32 none match" {
+    const data = [_]i32{ 1, 2, 3, 4, 5 };
+    const result = pichon_min_gt_i32(&data, data.len, 100);
+    // No match: returns minIdentity (maxInt)
+    try testing.expectEqual(std.math.maxInt(i32), result);
+}
+
+test "max_gt_i32 none match" {
+    const data = [_]i32{ 1, 2, 3, 4, 5 };
+    const result = pichon_max_gt_i32(&data, data.len, 100);
+    // No match: returns maxIdentity (minInt)
+    try testing.expectEqual(std.math.minInt(i32), result);
 }

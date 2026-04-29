@@ -52,9 +52,9 @@ pub fn sum(comptime T: type, ptr: [*]const T, len: usize) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         acc0 += ptr[i..][0..L].*;
-        acc1 += ptr[i + L..][0..L].*;
-        acc2 += ptr[i + 2 * L..][0..L].*;
-        acc3 += ptr[i + 3 * L..][0..L].*;
+        acc1 += ptr[i + L ..][0..L].*;
+        acc2 += ptr[i + 2 * L ..][0..L].*;
+        acc3 += ptr[i + 3 * L ..][0..L].*;
     }
 
     // merge accumulators
@@ -89,9 +89,9 @@ pub fn sumWiden(comptime T: type, comptime R: type, ptr: [*]const T, len: usize)
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @as(VecR, v0);
         acc1 += @as(VecR, v1);
         acc2 += @as(VecR, v2);
@@ -136,9 +136,9 @@ pub fn sumGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @select(T, v0 > threshold_vec, v0, zero);
         acc1 += @select(T, v1 > threshold_vec, v1, zero);
         acc2 += @select(T, v2 > threshold_vec, v2, zero);
@@ -181,9 +181,9 @@ pub fn sumGtWiden(comptime T: type, comptime R: type, ptr: [*]const T, len: usiz
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @as(VecR, @select(T, v0 > threshold_vec, v0, zero));
         acc1 += @as(VecR, @select(T, v1 > threshold_vec, v1, zero));
         acc2 += @as(VecR, @select(T, v2 > threshold_vec, v2, zero));
@@ -228,9 +228,9 @@ pub fn sumLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @select(T, v0 < threshold_vec, v0, zero);
         acc1 += @select(T, v1 < threshold_vec, v1, zero);
         acc2 += @select(T, v2 < threshold_vec, v2, zero);
@@ -273,9 +273,9 @@ pub fn sumLtWiden(comptime T: type, comptime R: type, ptr: [*]const T, len: usiz
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @as(VecR, @select(T, v0 < threshold_vec, v0, zero));
         acc1 += @as(VecR, @select(T, v1 < threshold_vec, v1, zero));
         acc2 += @as(VecR, @select(T, v2 < threshold_vec, v2, zero));
@@ -322,9 +322,9 @@ pub fn countGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) usiz
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @select(usize, v0 > threshold_vec, one, zero);
         acc1 += @select(usize, v1 > threshold_vec, one, zero);
         acc2 += @select(usize, v2 > threshold_vec, one, zero);
@@ -367,9 +367,9 @@ pub fn countLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) usiz
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 += @select(usize, v0 < threshold_vec, one, zero);
         acc1 += @select(usize, v1 < threshold_vec, one, zero);
         acc2 += @select(usize, v2 < threshold_vec, one, zero);
@@ -430,9 +430,9 @@ pub fn minGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 = @min(acc0, @select(T, v0 > threshold_vec, v0, identity));
         acc1 = @min(acc1, @select(T, v1 > threshold_vec, v1, identity));
         acc2 = @min(acc2, @select(T, v2 > threshold_vec, v2, identity));
@@ -473,9 +473,9 @@ pub fn minLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 = @min(acc0, @select(T, v0 < threshold_vec, v0, identity));
         acc1 = @min(acc1, @select(T, v1 < threshold_vec, v1, identity));
         acc2 = @min(acc2, @select(T, v2 < threshold_vec, v2, identity));
@@ -614,9 +614,9 @@ pub fn maxGt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 = @max(acc0, @select(T, v0 > threshold_vec, v0, identity));
         acc1 = @max(acc1, @select(T, v1 > threshold_vec, v1, identity));
         acc2 = @max(acc2, @select(T, v2 > threshold_vec, v2, identity));
@@ -657,9 +657,9 @@ pub fn maxLt(comptime T: type, ptr: [*]const T, len: usize, threshold: T) T {
     // 4x unrolled main loop
     while (i + U <= len) : (i += U) {
         const v0: Vec(T) = ptr[i..][0..L].*;
-        const v1: Vec(T) = ptr[i + L..][0..L].*;
-        const v2: Vec(T) = ptr[i + 2 * L..][0..L].*;
-        const v3: Vec(T) = ptr[i + 3 * L..][0..L].*;
+        const v1: Vec(T) = ptr[i + L ..][0..L].*;
+        const v2: Vec(T) = ptr[i + 2 * L ..][0..L].*;
+        const v3: Vec(T) = ptr[i + 3 * L ..][0..L].*;
         acc0 = @max(acc0, @select(T, v0 < threshold_vec, v0, identity));
         acc1 = @max(acc1, @select(T, v1 < threshold_vec, v1, identity));
         acc2 = @max(acc2, @select(T, v2 < threshold_vec, v2, identity));

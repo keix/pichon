@@ -98,8 +98,3 @@ comptime {
     _ = &fusion.pichon_max_lt_i64;
     _ = &fusion.pichon_max_lt_f64;
 }
-
-// Tests
-test {
-    @import("std").testing.refAllDecls(@This());
-}

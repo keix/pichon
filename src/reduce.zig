@@ -120,3 +120,90 @@ test "max_i32" {
     const result = pichon_max_i32(&data, data.len);
     try testing.expectEqual(@as(i32, 9), result);
 }
+
+test "min_i64" {
+    const data = [_]i64{ 5, 2, 8, 1, 9 };
+    const result = pichon_min_i64(&data, data.len);
+    try testing.expectEqual(@as(i64, 1), result);
+}
+
+test "min_f64" {
+    const data = [_]f64{ 5.5, 2.2, 8.8, 1.1, 9.9 };
+    const result = pichon_min_f64(&data, data.len);
+    try testing.expectApproxEqAbs(@as(f64, 1.1), result, 0.001);
+}
+
+test "max_i64" {
+    const data = [_]i64{ 5, 2, 8, 1, 9 };
+    const result = pichon_max_i64(&data, data.len);
+    try testing.expectEqual(@as(i64, 9), result);
+}
+
+test "max_f64" {
+    const data = [_]f64{ 5.5, 2.2, 8.8, 1.1, 9.9 };
+    const result = pichon_max_f64(&data, data.len);
+    try testing.expectApproxEqAbs(@as(f64, 9.9), result, 0.001);
+}
+
+// Edge cases: empty array
+test "sum_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_sum_i32(&data, 0);
+    try testing.expectEqual(@as(i64, 0), result);
+}
+
+test "min_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_min_i32(&data, 0);
+    try testing.expectEqual(@as(i32, 0), result);
+}
+
+test "max_i32 empty" {
+    const data = [_]i32{};
+    const result = pichon_max_i32(&data, 0);
+    try testing.expectEqual(@as(i32, 0), result);
+}
+
+// Edge cases: single element
+test "sum_i32 single" {
+    const data = [_]i32{42};
+    const result = pichon_sum_i32(&data, 1);
+    try testing.expectEqual(@as(i64, 42), result);
+}
+
+test "min_i32 single" {
+    const data = [_]i32{42};
+    const result = pichon_min_i32(&data, 1);
+    try testing.expectEqual(@as(i32, 42), result);
+}
+
+test "max_i32 single" {
+    const data = [_]i32{42};
+    const result = pichon_max_i32(&data, 1);
+    try testing.expectEqual(@as(i32, 42), result);
+}
+
+// Edge cases: negative values
+test "min_i64 negative" {
+    const data = [_]i64{ -5, -2, -8, -1, -9 };
+    const result = pichon_min_i64(&data, data.len);
+    try testing.expectEqual(@as(i64, -9), result);
+}
+
+test "max_i64 negative" {
+    const data = [_]i64{ -5, -2, -8, -1, -9 };
+    const result = pichon_max_i64(&data, data.len);
+    try testing.expectEqual(@as(i64, -1), result);
+}
+
+test "min_f64 negative" {
+    const data = [_]f64{ -5.5, -2.2, -8.8, -1.1, -9.9 };
+    const result = pichon_min_f64(&data, data.len);
+    try testing.expectApproxEqAbs(@as(f64, -9.9), result, 0.001);
+}
+
+test "max_f64 negative" {
+    const data = [_]f64{ -5.5, -2.2, -8.8, -1.1, -9.9 };
+    const result = pichon_max_f64(&data, data.len);
+    try testing.expectApproxEqAbs(@as(f64, -1.1), result, 0.001);
+}
