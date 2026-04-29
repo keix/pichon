@@ -10,6 +10,10 @@ pub const filter = @import("filter.zig");
 pub const map = @import("map.zig");
 pub const fusion = @import("fusion.zig");
 pub const err = @import("error.zig");
+pub const abi = @import("abi.zig");
+pub const simd_guarantee = @import("simd_guarantee.zig");
+pub const memory = @import("memory.zig");
+pub const perf = @import("perf.zig");
 
 // Force symbols to be included in the library
 comptime {
