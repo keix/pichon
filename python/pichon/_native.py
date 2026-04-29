@@ -1,11 +1,11 @@
 """
-Pichon Python binding via ctypes.
+Pichon: Low-level ctypes binding.
 """
 
 from ctypes import CDLL, POINTER, c_int32, c_int64, c_double, c_size_t
 from pathlib import Path
 
-_lib_path = Path(__file__).parent.parent / "zig-out" / "lib" / "libpichon.so"
+_lib_path = Path(__file__).parent.parent.parent / "zig-out" / "lib" / "libpichon.so"
 lib = CDLL(str(_lib_path))
 
 # =============================================================================
@@ -74,6 +74,34 @@ lib.pichon_filter_gt_f64.argtypes = [
     c_double,
 ]
 lib.pichon_filter_gt_f64.restype = c_size_t
+
+# =============================================================================
+# Filter: less than
+# =============================================================================
+
+lib.pichon_filter_lt_i32.argtypes = [
+    POINTER(c_int32),
+    c_size_t,
+    POINTER(c_int32),
+    c_int32,
+]
+lib.pichon_filter_lt_i32.restype = c_size_t
+
+lib.pichon_filter_lt_i64.argtypes = [
+    POINTER(c_int64),
+    c_size_t,
+    POINTER(c_int64),
+    c_int64,
+]
+lib.pichon_filter_lt_i64.restype = c_size_t
+
+lib.pichon_filter_lt_f64.argtypes = [
+    POINTER(c_double),
+    c_size_t,
+    POINTER(c_double),
+    c_double,
+]
+lib.pichon_filter_lt_f64.restype = c_size_t
 
 # =============================================================================
 # Map: binary add/sub/mul
@@ -198,7 +226,7 @@ lib.pichon_mul_s_f64.argtypes = [
 lib.pichon_mul_s_f64.restype = None
 
 # =============================================================================
-# Fusion: sum_gt (filter > threshold, then sum)
+# Fusion: sum_gt / sum_lt
 # =============================================================================
 
 lib.pichon_sum_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
@@ -210,10 +238,6 @@ lib.pichon_sum_gt_i64.restype = c_int64
 lib.pichon_sum_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_sum_gt_f64.restype = c_double
 
-# =============================================================================
-# Fusion: sum_lt (filter < threshold, then sum)
-# =============================================================================
-
 lib.pichon_sum_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
 lib.pichon_sum_lt_i32.restype = c_int64
 
@@ -224,7 +248,7 @@ lib.pichon_sum_lt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_sum_lt_f64.restype = c_double
 
 # =============================================================================
-# Fusion: count_gt (count where > threshold)
+# Fusion: count_gt / count_lt
 # =============================================================================
 
 lib.pichon_count_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
@@ -236,10 +260,6 @@ lib.pichon_count_gt_i64.restype = c_size_t
 lib.pichon_count_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_count_gt_f64.restype = c_size_t
 
-# =============================================================================
-# Fusion: count_lt (count where < threshold)
-# =============================================================================
-
 lib.pichon_count_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
 lib.pichon_count_lt_i32.restype = c_size_t
 
@@ -250,7 +270,7 @@ lib.pichon_count_lt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_count_lt_f64.restype = c_size_t
 
 # =============================================================================
-# Fusion: min_gt (filter > threshold, then min)
+# Fusion: min_gt / min_lt
 # =============================================================================
 
 lib.pichon_min_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
@@ -262,10 +282,6 @@ lib.pichon_min_gt_i64.restype = c_int64
 lib.pichon_min_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_min_gt_f64.restype = c_double
 
-# =============================================================================
-# Fusion: min_lt (filter < threshold, then min)
-# =============================================================================
-
 lib.pichon_min_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
 lib.pichon_min_lt_i32.restype = c_int32
 
@@ -276,7 +292,7 @@ lib.pichon_min_lt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_min_lt_f64.restype = c_double
 
 # =============================================================================
-# Fusion: max_gt (filter > threshold, then max)
+# Fusion: max_gt / max_lt
 # =============================================================================
 
 lib.pichon_max_gt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
@@ -287,10 +303,6 @@ lib.pichon_max_gt_i64.restype = c_int64
 
 lib.pichon_max_gt_f64.argtypes = [POINTER(c_double), c_size_t, c_double]
 lib.pichon_max_gt_f64.restype = c_double
-
-# =============================================================================
-# Fusion: max_lt (filter < threshold, then max)
-# =============================================================================
 
 lib.pichon_max_lt_i32.argtypes = [POINTER(c_int32), c_size_t, c_int32]
 lib.pichon_max_lt_i32.restype = c_int32

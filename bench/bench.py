@@ -1,5 +1,13 @@
 """
-Benchmark: Python vs Pichon (i32, i64, f64)
+Benchmark: Reduce (Python vs Pichon)
+
+This benchmark measures SIMD reduction throughput.
+
+- Python:  interpreted loop, no vectorization
+- Pichon:  SIMD with 4x unrolling, 4 accumulators
+
+Note: ctypes array creation is excluded from timing.
+The measured time is pure reduction performance.
 """
 
 import sys
@@ -8,7 +16,7 @@ sys.path.insert(0, "python")
 
 import time
 from ctypes import c_int32, c_int64, c_double
-from binding import lib
+import pichon
 
 N = 10_000_000
 
@@ -22,7 +30,7 @@ def bench_i32():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    pichon_sum = lib.pichon_sum_i32(c_array, N)
+    pichon_sum = pichon.sum_i32(c_array)
     pichon_time = time.perf_counter() - t0
 
     return py_time, pichon_time, py_sum, pichon_sum
@@ -37,7 +45,7 @@ def bench_i64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    pichon_sum = lib.pichon_sum_i64(c_array, N)
+    pichon_sum = pichon.sum_i64(c_array)
     pichon_time = time.perf_counter() - t0
 
     return py_time, pichon_time, py_sum, pichon_sum
@@ -52,7 +60,7 @@ def bench_f64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    pichon_sum = lib.pichon_sum_f64(c_array, N)
+    pichon_sum = pichon.sum_f64(c_array)
     pichon_time = time.perf_counter() - t0
 
     return py_time, pichon_time, py_sum, pichon_sum

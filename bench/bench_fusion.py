@@ -1,5 +1,14 @@
 """
 Benchmark: Fusion (Python vs Pichon)
+
+This benchmark compares execution models, not just algorithms.
+The performance gain comes from eliminating intermediate memory.
+
+- Python:   interpreted loop with generator
+- 2-pass:   filter to buffer, then reduce (2x memory access)
+- fusion:   single pass, no intermediate allocation
+
+Fusion wins because it touches memory once.
 """
 
 import sys
@@ -8,7 +17,8 @@ sys.path.insert(0, "python")
 
 import time
 from ctypes import c_int32, c_int64, c_double
-from binding import lib
+import pichon
+from pichon._native import lib as _lib  # two-pass needs length control
 
 N = 10_000_000
 THRESHOLD = N // 2  # Filter ~50% of elements
@@ -24,12 +34,12 @@ def bench_sum_gt_i32():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_sum_i32(out, count)
+    count = _lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_sum_i32(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_sum_gt_i32(c_array, N, THRESHOLD)
+    fusion_result = pichon.sum_gt_i32(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -52,12 +62,12 @@ def bench_sum_gt_i64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_sum_i64(out, count)
+    count = _lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_sum_i64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_sum_gt_i64(c_array, N, THRESHOLD)
+    fusion_result = pichon.sum_gt_i64(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -81,12 +91,12 @@ def bench_sum_gt_f64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_f64(c_array, N, out, threshold)
-    two_pass_result = lib.pichon_sum_f64(out, count)
+    count = _lib.pichon_filter_gt_f64(c_array, N, out, threshold)
+    two_pass_result = _lib.pichon_sum_f64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_sum_gt_f64(c_array, N, threshold)
+    fusion_result = pichon.sum_gt_f64(c_array, threshold)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -109,12 +119,12 @@ def bench_min_gt_i32():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_min_i32(out, count)
+    count = _lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_min_i32(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_min_gt_i32(c_array, N, THRESHOLD)
+    fusion_result = pichon.min_gt_i32(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -137,12 +147,12 @@ def bench_min_gt_i64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_min_i64(out, count)
+    count = _lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_min_i64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_min_gt_i64(c_array, N, THRESHOLD)
+    fusion_result = pichon.min_gt_i64(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -166,12 +176,12 @@ def bench_min_gt_f64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_f64(c_array, N, out, threshold)
-    two_pass_result = lib.pichon_min_f64(out, count)
+    count = _lib.pichon_filter_gt_f64(c_array, N, out, threshold)
+    two_pass_result = _lib.pichon_min_f64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_min_gt_f64(c_array, N, threshold)
+    fusion_result = pichon.min_gt_f64(c_array, threshold)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -194,12 +204,12 @@ def bench_max_gt_i32():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_max_i32(out, count)
+    count = _lib.pichon_filter_gt_i32(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_max_i32(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_max_gt_i32(c_array, N, THRESHOLD)
+    fusion_result = pichon.max_gt_i32(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -222,12 +232,12 @@ def bench_max_gt_i64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
-    two_pass_result = lib.pichon_max_i64(out, count)
+    count = _lib.pichon_filter_gt_i64(c_array, N, out, THRESHOLD)
+    two_pass_result = _lib.pichon_max_i64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_max_gt_i64(c_array, N, THRESHOLD)
+    fusion_result = pichon.max_gt_i64(c_array, THRESHOLD)
     fusion_time = time.perf_counter() - t0
 
     return (
@@ -251,12 +261,12 @@ def bench_max_gt_f64():
     py_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    count = lib.pichon_filter_gt_f64(c_array, N, out, threshold)
-    two_pass_result = lib.pichon_max_f64(out, count)
+    count = _lib.pichon_filter_gt_f64(c_array, N, out, threshold)
+    two_pass_result = _lib.pichon_max_f64(out, count)
     two_pass_time = time.perf_counter() - t0
 
     t0 = time.perf_counter()
-    fusion_result = lib.pichon_max_gt_f64(c_array, N, threshold)
+    fusion_result = pichon.max_gt_f64(c_array, threshold)
     fusion_time = time.perf_counter() - t0
 
     return (
