@@ -2,10 +2,18 @@
 Pichon: Low-level ctypes binding.
 """
 
+import sys
 from ctypes import CDLL, POINTER, c_int32, c_int64, c_double, c_size_t
 from pathlib import Path
 
-_lib_path = Path(__file__).parent.parent.parent / "zig-out" / "lib" / "libpichon.so"
+if sys.platform == "darwin":
+    _lib_name = "libpichon.dylib"
+elif sys.platform == "win32":
+    _lib_name = "pichon.dll"
+else:
+    _lib_name = "libpichon.so"
+
+_lib_path = Path(__file__).parent.parent.parent / "zig-out" / "lib" / _lib_name
 lib = CDLL(str(_lib_path))
 
 # =============================================================================
